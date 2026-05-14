@@ -181,7 +181,7 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 ### Unit tests
 
 - [x] `test.unit.bits`
-- [ ] `test.unit.boolean`
+- [x] `test.unit.boolean`
 - [x] `test.unit.design-tokens`
 - [ ] `test.unit.editor`
 - [ ] `test.unit.hud`
@@ -189,7 +189,7 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [ ] `test.unit.three-kit`
 - [ ] `test.unit.apps-web`
 - [x] `test.property.bits`
-- [ ] `test.property.boolean`
+- [x] `test.property.boolean`
 - [ ] `test.property.sim-engine`
 - [ ] `test.codec-roundtrip`
 - [ ] `test.codec-hash-stability`
