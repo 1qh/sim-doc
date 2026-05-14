@@ -216,13 +216,13 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### Golden traces — encodable extension
 
-- [ ] `test.golden.andi`
-- [ ] `test.golden.j`
-- [ ] `test.golden.lui`
-- [ ] `test.golden.nor`
-- [ ] `test.golden.ori`
-- [ ] `test.golden.sll`
-- [ ] `test.golden.srl`
+- [x] `test.golden.andi`
+- [x] `test.golden.j`
+- [x] `test.golden.lui`
+- [x] `test.golden.nor`
+- [x] `test.golden.ori`
+- [x] `test.golden.sll`
+- [x] `test.golden.srl`
 
 ### Integration
 
