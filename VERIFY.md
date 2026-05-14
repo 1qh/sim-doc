@@ -157,12 +157,12 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 ### Type check
 
 - [x] `tsc.bits`
-- [ ] `tsc.boolean`
+- [x] `tsc.boolean`
 - [x] `tsc.design-tokens`
-- [ ] `tsc.editor`
-- [ ] `tsc.hud`
-- [ ] `tsc.sim-engine`
-- [ ] `tsc.three-kit`
+- [x] `tsc.editor`
+- [x] `tsc.hud`
+- [x] `tsc.sim-engine`
+- [x] `tsc.three-kit`
 - [ ] `tsc.apps-web`
 - [ ] `tsc.apps-backend`
 
