@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Locked direct deps across the project. Spec-of-code for the active-maintenance gate per book/HARD-RULES.md. Audit script at sim/tools/dep-audit/audit.ts queries https://registry.npmjs.org/<name> + asserts latest publish within 6 months. Any failure triggers OSS-import-first re-scan + replacement. Exceptions documented in adr/active-maintenance-exceptions.md.",
+  "core3d": [
+    "three",
+    "@react-three/fiber",
+    "@react-three/drei",
+    "@react-three/uikit",
+    "@react-three/xr",
+    "@three.ez/instanced-mesh",
+    "postprocessing",
+    "stats-gl",
+    "n8ao"
+  ],
+  "editor": [
+    "monaco-editor",
+    "chevrotain"
+  ],
+  "framework": [
+    "next",
+    "react",
+    "react-dom",
+    "@next/mdx"
+  ],
+  "state": [
+    "zustand"
+  ],
+  "validation": [
+    "zod"
+  ],
+  "animation": [
+    "motion"
+  ],
+  "ui": [
+    "lucide-react",
+    "@tanstack/react-form",
+    "@tanstack/react-table",
+    "@tanstack/react-virtual",
+    "@tanstack/react-query",
+    "@dnd-kit/react",
+    "@dnd-kit/abstract",
+    "@dnd-kit/dom",
+    "@dnd-kit/state",
+    "@dnd-kit/helpers"
+  ],
+  "utility": [
+    "es-toolkit",
+    "@logtape/logtape",
+    "ky"
+  ],
+  "persistence": [
+    "convex",
+    "@convex-dev/auth",
+    "@auth/core"
+  ],
+  "substrate_pure": [
+    "espresso-iisojs",
+    "@noble/hashes"
+  ],
+  "search": [
+    "@orama/orama"
+  ],
+  "color": [
+    "colorjs.io"
+  ],
+  "syntax_highlight": [
+    "shiki"
+  ],
+  "tooling": [
+    "turbo",
+    "sherif",
+    "simple-git-hooks",
+    "tsdown",
+    "@serwist/next"
+  ],
+  "lint": [
+    "lintmax"
+  ],
+  "perf": [
+    "size-limit",
+    "@size-limit/preset-app",
+    "unlighthouse",
+    "web-vitals",
+    "memlab",
+    "tinybench"
+  ],
+  "test": [
+    "happy-dom",
+    "@testing-library/react",
+    "fast-check",
+    "convex-test",
+    "@playwright/test",
+    "@stryker-mutator/core",
+    "axe-core",
+    "@axe-core/playwright",
+    "pa11y",
+    "typescript"
+  ],
+  "operator_maintained": [
+    "lintmax",
+    "pm4ai"
+  ],
+  "bun_builtins_no_npm_dep": [
+    "bun:sqlite",
+    "bun:test",
+    "Bun.file",
+    "Bun.write",
+    "Bun.Glob",
+    "Bun.zstdCompress",
+    "Bun.zstdDecompress",
+    "Bun.CryptoHasher",
+    "Bun.YAML",
+    "Bun.TOML",
+    "Bun.markdown",
+    "Bun.color",
+    "Bun.cron",
+    "Bun.$",
+    "Bun.spawn",
+    "Bun.env",
+    "Bun.semver",
+    "Bun.which",
+    "Bun.nanoseconds",
+    "Bun.deepEquals",
+    "Bun.inspect",
+    "Bun.randomUUIDv7"
+  ],
+  "shadcn_copied_source": [
+    "shadcn",
+    "cnsync"
+  ],
+  "hand_rolled_replaces_stale_or_dead": [
+    "toposort_(Kahn_algo_~30_LOC)",
+    "offscreen_canvas_r3f_wiring_(per_CONCURRENCY_md)",
+    "remark_frontmatter_(use_Bun.markdown_server_or_handroll_client)",
+    "safe_stable_stringify_(canonical_JSON_~50_LOC)",
+    "microdiff_(keyed_sim_state_diff_~50_LOC)",
+    "detect_gpu_(hardware_concurrency_+_device_memory_heuristic_~50_LOC)",
+    "next_themes_(theme_provider_~50_LOC)"
+  ]
+}
