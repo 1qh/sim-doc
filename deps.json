@@ -7,6 +7,7 @@
     "@react-three/drei",
     "@react-three/uikit",
     "@react-three/xr",
+    "@react-three/offscreen",
     "@three.ez/instanced-mesh",
     "postprocessing",
     "stats-gl",
@@ -33,6 +34,7 @@
   ],
   "ui": [
     "lucide-react",
+    "next-themes",
     "@tanstack/react-form",
     "@tanstack/react-table",
     "@tanstack/react-virtual",
@@ -55,7 +57,12 @@
   ],
   "substrate_pure": [
     "espresso-iisojs",
-    "@noble/hashes"
+    "@noble/hashes",
+    "canonicalize",
+    "rfc6902",
+    "@thi.ng/dgraph",
+    "detect-gpu",
+    "remark-frontmatter"
   ],
   "search": [
     "@orama/orama"
@@ -128,13 +135,13 @@
     "shadcn",
     "cnsync"
   ],
-  "hand_rolled_replaces_stale_or_dead": [
-    "toposort_(Kahn_algo_~30_LOC)",
-    "offscreen_canvas_r3f_wiring_(per_CONCURRENCY_md)",
-    "remark_frontmatter_(use_Bun.markdown_server_or_handroll_client)",
-    "safe_stable_stringify_(canonical_JSON_~50_LOC)",
-    "microdiff_(keyed_sim_state_diff_~50_LOC)",
-    "detect_gpu_(hardware_concurrency_+_device_memory_heuristic_~50_LOC)",
-    "next_themes_(theme_provider_~50_LOC)"
+  "hand_rolled_no_oss_alternative": [
+    "$comment: every entry here must have NO actively-maintained OSS alternative + must be in adr/oss-import-audit.md with rejection rationale. Per operator: never reinvent the wheel.",
+    "sim-engine state machine (pure (state, action) → state', ≤100 LOC, XState wrong shape)",
+    "MIPS executor with per-step datapath trace (no library returns per-cycle trace; existing libs return final state only)",
+    "object pool for Three.js Vector3/Quaternion/Matrix4 (≤30 LOC, no sized OSS pool)",
+    "bits utilities two's complement + sign-extend (≤60 LOC, no sized OSS)",
+    "base64url wrapper around btoa/atob (~10 LOC trivial)",
+    "QM + Petrick + hazard analysis on top of espresso-iisojs (no actively-maintained JS QM library)"
   ]
 }
