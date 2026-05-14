@@ -134,3 +134,277 @@ Per session start: `make ledger` reports green-at-HEAD. `make ledger.stale` repo
 - Every gate above wired via ledger recorder
 - CI runs every gate on every push
 - Manifest lint asserts every gate has a wired script
+
+## Checklist
+
+Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the matching `ledger.jsonl` row's `notes` field. Lazy-tick is a violation.
+
+### Format + lint
+
+- [ ] `format` — `bun run fix` exits silent
+- [ ] `lint.disable-reasons` — `tools/lint/disable-reasons.ts`
+- [ ] `lint.no-school-refs` — `tools/lint/no-school-refs.ts`
+- [ ] `lint.atemporal-docs` — `tools/lint/atemporal-docs.ts`
+- [ ] `lint.no-fallback` — `tools/lint/zero-fallback.ts`
+- [ ] `lint.no-infinite-wait` — `tools/lint/check-no-infinite-wait.ts`
+- [ ] `lint.no-determinism-leak` — `tools/lint/no-determinism-leak.ts`
+- [ ] `lint.substrate-boundary` — `tools/lint/substrate-boundary.ts`
+- [ ] `lint.agent-first-output` — `tools/lint/agent-first-output.ts`
+- [ ] `lint.cloudflare-bearer` — `tools/lint/cloudflare-bearer.ts`
+- [ ] `lint.no-dangerous-html` — `tools/lint/no-dangerously-set-inner-html.ts`
+- [ ] `lint.no-third-party-trackers` — `tools/lint/no-third-party-trackers.ts`
+
+### Type check
+
+- [ ] `tsc.bits`
+- [ ] `tsc.boolean`
+- [ ] `tsc.design-tokens`
+- [ ] `tsc.editor`
+- [ ] `tsc.hud`
+- [ ] `tsc.sim-engine`
+- [ ] `tsc.three-kit`
+- [ ] `tsc.apps-web`
+- [ ] `tsc.apps-backend`
+
+### Codegen freshness
+
+- [ ] `gen.check`
+
+### Spec-of-code drift
+
+- [ ] `spec.datapath`
+- [ ] `spec.isa`
+- [ ] `spec.stack`
+- [ ] `spec.schemas`
+- [ ] `spec.lint-baseline`
+
+### Unit tests
+
+- [ ] `test.unit.bits`
+- [ ] `test.unit.boolean`
+- [ ] `test.unit.design-tokens`
+- [ ] `test.unit.editor`
+- [ ] `test.unit.hud`
+- [ ] `test.unit.sim-engine`
+- [ ] `test.unit.three-kit`
+- [ ] `test.unit.apps-web`
+- [ ] `test.property.bits`
+- [ ] `test.property.boolean`
+- [ ] `test.property.sim-engine`
+- [ ] `test.codec-roundtrip`
+- [ ] `test.codec-hash-stability`
+- [ ] `test.crossmachine-hash`
+
+### Replay codec
+
+- [ ] `test.replay.v1`
+- [ ] `test.replay.v2`
+- [ ] `test.replay.v3`
+
+### Golden traces — datapath-animated instructions
+
+- [ ] `test.golden.add`
+- [ ] `test.golden.addi`
+- [ ] `test.golden.and`
+- [ ] `test.golden.beq`
+- [ ] `test.golden.bne`
+- [ ] `test.golden.lw`
+- [ ] `test.golden.or`
+- [ ] `test.golden.slt`
+- [ ] `test.golden.sub`
+- [ ] `test.golden.sw`
+
+### Golden traces — encodable extension
+
+- [ ] `test.golden.andi`
+- [ ] `test.golden.j`
+- [ ] `test.golden.lui`
+- [ ] `test.golden.nor`
+- [ ] `test.golden.ori`
+- [ ] `test.golden.sll`
+- [ ] `test.golden.srl`
+
+### Integration
+
+- [ ] `test.convex`
+- [ ] `test.auth-flow`
+- [ ] `test.rate-limit`
+
+### E2E — anonymous routes
+
+- [ ] `test.e2e.anon.home`
+- [ ] `test.e2e.anon.mips`
+- [ ] `test.e2e.anon.kmap`
+- [ ] `test.e2e.anon.compare`
+- [ ] `test.e2e.anon.pipeline`
+- [ ] `test.e2e.anon.learn`
+- [ ] `test.e2e.anon.foundation`
+- [ ] `test.e2e.anon.share`
+- [ ] `test.e2e.share`
+- [ ] `test.e2e.compare`
+
+### E2E — pipeline hazards
+
+- [ ] `test.e2e.pipeline.raw`
+- [ ] `test.e2e.pipeline.waw`
+- [ ] `test.e2e.pipeline.war`
+- [ ] `test.e2e.pipeline.control`
+- [ ] `test.e2e.pipeline.forwarding`
+- [ ] `test.e2e.pipeline.stall`
+
+### E2E — K-map 2D
+
+- [ ] `test.e2e.kmap-2d.v2-basic`
+- [ ] `test.e2e.kmap-2d.v3-basic`
+- [ ] `test.e2e.kmap-2d.v4-basic`
+- [ ] `test.e2e.kmap-2d.v4-dontcare`
+- [ ] `test.e2e.kmap-2d.v4-essential-pi`
+- [ ] `test.e2e.kmap-2d.v4-petrick`
+- [ ] `test.e2e.kmap-2d.v4-pos`
+- [ ] `test.e2e.kmap-2d.v4-multi-output`
+- [ ] `test.e2e.kmap-2d.v4-hazard`
+- [ ] `test.e2e.kmap-2d.v4-wrap`
+
+### E2E — K-map 3D
+
+- [ ] `test.e2e.kmap-3d.v5-basic`
+- [ ] `test.e2e.kmap-3d.v5-wrap`
+- [ ] `test.e2e.kmap-3d.v5-petrick`
+- [ ] `test.e2e.kmap-3d.v6-basic`
+- [ ] `test.e2e.kmap-3d.v6-wrap`
+- [ ] `test.e2e.kmap-3d.v6-multi-output`
+
+### Performance — bundle size
+
+- [ ] `perf.bundle-size.home`
+- [ ] `perf.bundle-size.mips`
+- [ ] `perf.bundle-size.kmap`
+- [ ] `perf.bundle-size.compare`
+- [ ] `perf.bundle-size.pipeline`
+- [ ] `perf.bundle-size.learn`
+- [ ] `perf.bundle-size.foundation`
+- [ ] `perf.bundle-size.share`
+
+### Performance — Lighthouse
+
+- [ ] `perf.lighthouse.home`
+- [ ] `perf.lighthouse.mips`
+- [ ] `perf.lighthouse.kmap`
+- [ ] `perf.lighthouse.compare`
+- [ ] `perf.lighthouse.pipeline`
+- [ ] `perf.lighthouse.learn`
+- [ ] `perf.lighthouse.foundation`
+- [ ] `perf.lighthouse.share`
+
+### Performance — frame budget + heap
+
+- [ ] `perf.frame-budget.datapath`
+- [ ] `perf.frame-budget.kmap-2d`
+- [ ] `perf.frame-budget.kmap-3d`
+- [ ] `perf.frame-budget.compare`
+- [ ] `perf.frame-budget.pipeline`
+- [ ] `perf.frame-budget.foundation`
+- [ ] `perf.heap-leak.datapath-cycle`
+- [ ] `perf.heap-leak.kmap-cycle`
+- [ ] `perf.heap-leak.share-cycle`
+
+### Accessibility — axe per route × variant
+
+- [ ] `a11y.axe.home`
+- [ ] `a11y.axe.mips`
+- [ ] `a11y.axe.kmap`
+- [ ] `a11y.axe.compare`
+- [ ] `a11y.axe.pipeline`
+- [ ] `a11y.axe.learn`
+- [ ] `a11y.axe.foundation`
+- [ ] `a11y.axe.share`
+- [ ] `a11y.axe.reduced-motion`
+- [ ] `a11y.axe.high-contrast`
+- [ ] `a11y.axe.color-blind`
+
+### Accessibility — contrast + keyboard
+
+- [ ] `a11y.contrast.dark`
+- [ ] `a11y.contrast.light`
+- [ ] `a11y.contrast.color-blind`
+- [ ] `a11y.keyboard.home`
+- [ ] `a11y.keyboard.mips`
+- [ ] `a11y.keyboard.kmap`
+- [ ] `a11y.keyboard.compare`
+- [ ] `a11y.keyboard.pipeline`
+- [ ] `a11y.keyboard.learn`
+- [ ] `a11y.keyboard.foundation`
+- [ ] `a11y.keyboard.share`
+
+### Visual regression — datapath per instruction
+
+- [ ] `visual.datapath.add`
+- [ ] `visual.datapath.addi`
+- [ ] `visual.datapath.and`
+- [ ] `visual.datapath.beq`
+- [ ] `visual.datapath.bne`
+- [ ] `visual.datapath.lw`
+- [ ] `visual.datapath.or`
+- [ ] `visual.datapath.slt`
+- [ ] `visual.datapath.sub`
+- [ ] `visual.datapath.sw`
+- [ ] `visual.datapath.andi`
+- [ ] `visual.datapath.j`
+- [ ] `visual.datapath.lui`
+- [ ] `visual.datapath.nor`
+- [ ] `visual.datapath.ori`
+- [ ] `visual.datapath.sll`
+- [ ] `visual.datapath.srl`
+
+### Visual regression — K-map + pipeline
+
+- [ ] `visual.kmap.v2`
+- [ ] `visual.kmap.v3`
+- [ ] `visual.kmap.v4`
+- [ ] `visual.kmap.v4-pos`
+- [ ] `visual.kmap.v5`
+- [ ] `visual.kmap.v5-wrap`
+- [ ] `visual.kmap.v6`
+- [ ] `visual.kmap.v6-wrap`
+- [ ] `visual.pipeline.raw`
+- [ ] `visual.pipeline.waw`
+- [ ] `visual.pipeline.war`
+- [ ] `visual.pipeline.control`
+- [ ] `visual.pipeline.forwarding`
+- [ ] `visual.pipeline.stall`
+
+### Mutation testing
+
+- [ ] `mutate.sim-engine`
+- [ ] `mutate.boolean`
+- [ ] `mutate.bits`
+
+### Local-first verification
+
+- [ ] `verify.local`
+- [ ] `verify.bearer`
+- [ ] `verify.fresh`
+
+### Deploy verification
+
+- [ ] `smoke.deploy.home`
+- [ ] `smoke.deploy.mips`
+- [ ] `smoke.deploy.kmap`
+- [ ] `smoke.deploy.compare`
+- [ ] `smoke.deploy.pipeline`
+- [ ] `smoke.deploy.learn`
+- [ ] `smoke.deploy.share`
+- [ ] `smoke.share.dokploy`
+- [ ] `smoke.share.cloudflare-tunnel`
+
+### Infra
+
+- [ ] `infra.convex.local`
+- [ ] `infra.convex.dokploy`
+- [ ] `infra.cloudflare.dns`
+- [ ] `infra.cloudflare.tunnel`
+- [ ] `infra.ci.actions-enabled`
+- [ ] `infra.ci.green-on-main`
+- [ ] `infra.repos.sim-pushed`
+- [ ] `infra.repos.simdocs-pushed`
+- [ ] `infra.ledger.stale-empty`
