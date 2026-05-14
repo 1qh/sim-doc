@@ -185,14 +185,14 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [x] `test.unit.design-tokens`
 - [ ] `test.unit.editor`
 - [ ] `test.unit.hud`
-- [ ] `test.unit.sim-engine`
+- [x] `test.unit.sim-engine`
 - [ ] `test.unit.three-kit`
 - [ ] `test.unit.apps-web`
 - [x] `test.property.bits`
 - [x] `test.property.boolean`
-- [ ] `test.property.sim-engine`
-- [ ] `test.codec-roundtrip`
-- [ ] `test.codec-hash-stability`
+- [x] `test.property.sim-engine`
+- [x] `test.codec-roundtrip`
+- [x] `test.codec-hash-stability`
 - [ ] `test.crossmachine-hash`
 
 ### Replay codec
