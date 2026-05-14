@@ -86,6 +86,19 @@ mindmap
       next pwa or Workbox service worker
     OG
       next ImageResponse
+    OSS substrate libs
+      safe-stable-stringify canonicalize
+      microdiff state diff
+      chevrotain parser
+      mini-search command palette fuzzy
+      workerpool worker primitive
+      detect-gpu device tier
+      culori color science
+      toposort dependency graph
+      shiki MDX code blocks
+      gray-matter MDX frontmatter
+      react-hook-form forms over Zod
+      Comlink worker RPC
     CI
       GitHub Actions matched to operator reference deploy project pattern in memory
       Renovate auto bumps
@@ -150,5 +163,6 @@ Same images, same env shape, same bootstrap. Scale parameters differ between dep
 
 - Stack-presence lint per pick (`tools/lint/stack-presence.ts`)
 - Staleness gate (`tools/lint/check-staleness.ts`)
+- OSS-import-first lint (`tools/lint/oss-import-first.ts`) per `adr/oss-import-audit.md` — hand-roll without rejection-rationale entry = violation
 - ADR-presence lint — every pick on this page has an ADR file under `adr/`
 - Spec-of-code allowlist entry — `STACK.md` is itself spec-of-code per `book/HARD-RULES.md`

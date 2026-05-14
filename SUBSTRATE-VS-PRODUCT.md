@@ -42,6 +42,7 @@ Each package ships with foundation-app demo proving the primitive against a gene
 - **Substrate accumulating MIPS or K-map knowledge** — substrate stays domain-agnostic. The boolean package solves any Boolean function; it does not know about Control or ALUOp. The sim-engine handles any deterministic state machine; it does not know about PC or register files. Caught by: substrate package source greps for MIPS / K-map / domain vocab in CI lint.
 - **Product re-implementing substrate concerns** — every commit in `apps/web` reviewed against "is there a substrate package that owns this?". Caught by: lint scan for code shapes that match existing substrate primitives.
 - **Premature publication** — substrate source is OSS-public, but installable artifacts (npm) are not published until a second consumer exists. Until then, substrate is consumed via workspace dependency only. Caught by: package.json `private: true` until a second consumer materializes.
+- **Wheel reinvention** — every non-trivial primitive (>30 LOC, non-trivial logic, anything matching a category in `adr/oss-import-audit.md`) gets OSS-import-first scan before hand-roll. Hand-roll requires rejection-rationale entry in `adr/oss-import-audit.md`. Caught by: `tools/lint/oss-import-first.ts`.
 
 ## Growth loop
 
