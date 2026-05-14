@@ -188,6 +188,25 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 - Zero 301/302 redirects — direct routing always
 - Precompiled regexes at module top-level, reused
 - Mutate-in-place over `slice` / `concat` in hot loops
+- Compile-time pre-computation — golden traces, K-map solver results for canonical fixtures, datapath topology pre-arranged ship as static JSON. Zero runtime compute for fixture loads
+- Zstd content encoding for static assets (build-time, alongside Brotli L11; browser negotiates via `Accept-Encoding: zstd`)
+- TCP BBR congestion control on origin VM (kernel sysctl) — measurable on real connections
+- Adaptive quality via drei `PerformanceMonitor` — under FPS pressure auto-downgrade pixel ratio + LOD detail tier, restore on recovery
+- Device-tier detection at boot (`navigator.hardwareConcurrency`, `navigator.deviceMemory`, GPU heuristic) — high-tier full detail, mid-tier reduced LOD, low-tier read-only-equivalent
+- GPU timer queries via `EXT_disjoint_timer_query` extension — real GPU frame time measured, not assumed
+- Adaptive pixel ratio — under FPS pressure scale down before stuttering, cap at `Math.min(2, devicePixelRatio)` baseline
+- AbortSignal everywhere — every async op accepts + checks `AbortSignal`; nav drops in-flight work
+- Geometry / material / texture `.dispose()` on unmount — GPU resource cleanup discipline
+- Server Timing header (`Server-Timing: db;dur=12,render;dur=8`) — RUM aggregation of server-side latency breakdown
+- Tab visibility pause — telemetry + idle compute paused when `document.visibilityState === 'hidden'`
+- Idle detection via `IdleDetector` (where available) or `requestIdleCallback` heuristic — non-critical compute paused on user idle
+- Workbox precache by revision keys (not URL) — bundle hash drives cache invalidation
+- `CompressionStream` / `DecompressionStream` for client-side zstd decode of snapshot bodies (Safari fallback to `fzstd` wasm)
+- `scheduler.yield()` inside extended `useFrame` work units — keeps frame budget elastic when heavy compute leaks into render path
+- `will-change` CSS audit — applied only to elements provably benefitting from compositor promotion, removed when no longer animating
+- HTTP/3 0-RTT enabled in Caddy config — instant resume for repeat visitors
+- Cross-Origin-Resource-Policy (CORP) header on served assets — `same-origin` for product, `cross-origin` for substrate OSS bundles when shareable
+- Resource Timing API client-side aggregation → `/api/rum` — per-asset latency, cache state, transfer size for tuning
 
 ## Anti-patterns banned
 
@@ -215,6 +234,11 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 - `slice` / `concat` in hot loops (mutate-in-place)
 - `JSON.parse(JSON.stringify(...))` for deep copy (use `structuredClone`)
 - Inline regex literals re-created in hot path (precompile at module top-level)
+- Async operations without `AbortSignal` parameter (must accept + check on every iteration)
+- Geometry / material / texture allocations not paired with `.dispose()` on unmount (GPU resource leak)
+- `will-change` on every animated element (over-use bloats compositor memory — apply only when measurably needed, remove after animation completes)
+- Heavy compute continuing on hidden tabs (must pause when `document.visibilityState === 'hidden'`)
+- Telemetry transmission on hidden tabs (queue, flush on visibility restore)
 
 ## Deferred-with-trigger ratchets
 
@@ -225,6 +249,9 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 | Multi-region anycast origin | Operator commits to multi-region infra; current single-region origin hits latency ceiling on real users |
 | Edge-rendered RSC (per-region origin) | Same as above |
 | SharedArrayBuffer + COOP/COEP | Worker `postMessage` serialization > 5ms p95 on hot-path data |
+| Skia / CanvasKit via wasm | Browser Canvas2D measurably bottlenecks any UI surface (unlikely with 3D-dominant product) |
+| CPU affinity for server workers | Operator commits to per-core tuning; current default scheduling hits CPU contention |
+| ImportMap-based runtime module sharing | Substrate ships as separately-versioned npm artifacts (post extract-on-second-use) |
 
 ## Caught by
 
@@ -241,3 +268,13 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 - CDN cache hit ratio weekly review
 - Long-task RUM aggregate (zero > 50ms during interaction)
 - Worker-warmup smoke (workers responsive within 5ms of first message)
+- Compile-time fixture audit — every canonical example ships pre-computed result
+- Zstd negotiation smoke — `Accept-Encoding: zstd` returns zstd payload
+- TCP BBR sysctl verified on origin VM
+- `PerformanceMonitor` smoke — synthetic FPS drop triggers detail downgrade, recovery restores
+- GPU timer query smoke — frame-time measurement returns within 1ms of CPU-side estimate
+- AbortSignal coverage lint — every exported async function declares `signal?: AbortSignal`
+- Dispose discipline lint — every `useEffect` mounting GPU resources returns a cleanup that calls `.dispose()`
+- Server-Timing emission smoke — Route Handler responses carry breakdown header
+- Tab-visibility behavior smoke — telemetry batches flush only on visibility restore
+- Resource Timing aggregation RUM weekly review
