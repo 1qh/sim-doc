@@ -1,6 +1,6 @@
 # UX-DOCTRINE
 
-Visual + interaction rules for the product surface. Pedagogy is the product; motion is informative; aesthetic is professional silicon, never gamified, never childish.
+Visual + interaction rules. Pedagogy = product. Motion informative. Aesthetic industrial silicon, never gamified, never childish.
 
 ## Reference vibe
 
@@ -16,137 +16,117 @@ mindmap
       Linear
       Arc
       Rauno portfolios
-    Pedagogy gold standard
+    Pedagogy
       Bartosz Ciechanowski essays
     Premium 3D web
       Lusion
       Active Theory
-      Apple keynote stage parallax
 ```
 
-Banned vibes: game UI, neon rainbow, comic-sans-adjacent, anything "fun edutech", gamification badges, achievement toasts, level-up sounds, mascots.
+Banned: game UI, neon rainbow, comic-sans-adjacent, fun edutech, gamification badges, achievement toasts, mascots.
 
 ## Palette
 
-- Background: near-black, single tone, no gradient
-- Foreground primary: warm off-white for text and chrome
-- Foreground secondary: cool gray for tertiary text
-- Single accent: cyan-leaning for active signal / highlight (locked unless overridden by future ADR)
-- Single warning accent: amber for hazards, breakpoint hits, errors
-- Reductive palette enforced — no more than five named hues across the entire product
+- Near-black bg, single tone, no gradient
+- Warm off-white primary text
+- Cool gray tertiary text
+- Single accent cyan-leaning for active signal
+- Single amber for hazards/breakpoints/errors
+- Max 5 named hues across product
 
-Material palette (3D scene):
+Material palette (3D):
 - Silicon die: machined-aluminum PBR, brushed normal, baked AO
-- Buses / wires: emissive trace material, tunable intensity, energy travels as luminous pulse
-- Glass enclosures: drei MeshTransmissionMaterial with low chromatic aberration
-- PCB substrate: FR4-shaped color, micro-detail via normal map
-- Active component glow: accent-tinted emissive when signal is live, otherwise inert
+- Buses: emissive trace, signal-pulse compatible
+- Glass: drei MeshTransmissionMaterial low chromatic ab
+- PCB: FR4-color, micro normal map
+- Active glow: accent emissive when live, inert otherwise
 
 ## Typography
 
-- Mono: JetBrains Mono or Berkeley Mono, weights 400/500/700
-- Tabular nums for every register value, every counter, every signal value
-- Display: variable mono or proportional grotesque at large sizes only (h1 headings, brand-when-named)
-- Size scale: 12 / 14 / 16 / 20 / 28 / 40 / 64, no in-between
-- Line-height tight on data, generous on prose
+- Mono: JetBrains/Berkeley Mono, weights 400/500/700
+- Tabular nums on every reg value, counter, signal
+- Display: variable mono or proportional grotesque at large sizes
+- Scale: 12/14/16/20/28/40/64, no in-between
+- Tight line-height on data, generous on prose
 
 ## Motion
 
-- Every transition encodes a state change — no purely decorative animation
-- Default easing: `cubic-bezier(0.2, 0.8, 0.2, 1)` ("smooth-out", calm, premium)
-- Spring physics on interactive elements: drag a wire and it has tension; click a register and the drawer slides with weight; hover a signal and it lifts subtly
-- Reduced-motion respected — animations collapse to instantaneous state swaps when `prefers-reduced-motion: reduce`
-- Stage transitions in datapath: depth-of-field focus pulls to active component, restrained, ~400-600ms
-- Signal propagation along buses: physically plausible falloff, never instantaneous "all lights on at once"
-- Camera moves: dolly + cut, never spinning, never roller-coaster, never "wow we did 3D" rotation
+- Every transition encodes state change
+- Default easing `cubic-bezier(0.2, 0.8, 0.2, 1)` smoothOut
+- Spring physics on interactive elements
+- Reduced-motion → instant snaps, info preserved
+- Stage transitions: DoF focus pulls, 400-600ms
+- Signal pulses: physically plausible falloff, never instant all-on
+- Camera: dolly + cut. No spin, no roller-coaster, no "we did 3D" rotation
+
+Concrete timings in `MOTION-CATALOGUE.md`.
 
 ## Camera grammar
 
-- Bookmarked views per scene: whole-datapath, ALU close-up, register file iso, control unit, memory close-up, pipeline side-view
-- Smooth dolly between bookmarks, ~800ms easing
-- Free-orbit available but tertiary — bookmarks are primary
-- Keyboard 1-9 jump to bookmarks
-- Mouse drag = orbit, scroll = dolly, right-drag = pan (standard CAD-like)
+Bookmarked views per scene: whole-datapath / ALU close / reg file iso / control unit / memory / pipeline side.
 
-## Depth and lighting
+Dolly between bookmarks ~800ms easing. Free orbit available but tertiary. Keys 1-9 jump. Mouse drag = orbit, scroll = dolly, right-drag = pan.
 
-- One key directional light + HDRI environment for global PBR reflections (drei `Environment` studio preset)
-- Contact shadows beneath every grounded component
-- Subtle bloom restrained — never bloom-soup
-- Layered depth-of-field focus pulls to active stage
-- SSAO baked into screen-space ambient occlusion via postprocessing
+## Depth + lighting
+
+One key directional + HDRI environment for PBR. Contact shadows. Restrained bloom. Layered DoF focus pulls. SSAO via postprocessing.
 
 ## Diegetic readouts
 
-Values render *on* the silicon (decals, etched labels) where the geometry allows, not floating in space:
-- Register file: register names + current values etched on the face
-- ALU: result + zero flag readable from the surface
-- Control unit: signal name plates with current value light
-- Memory: address + word values laid out as physical grid
+Values etched on silicon, not floating:
+- Register file: names + values on face
+- ALU: result + zero flag on surface
+- Control unit: signal plates with light
+- Memory: address + word physical grid
 
-Tooltips exist but tertiary — surface labels carry the primary data.
+Tooltips tertiary. Surface labels primary.
 
-## In-3D HUD vs DOM HUD
+## In-3D vs DOM HUD
 
-- In-3D HUD (`packages/hud`, uikit-backed): floats with the scene, follows the camera, sharper than `Html` drei overlays, used for telemetry that should feel part of the scene (signal value annotations, breakpoint pins)
-- DOM HUD: editor, register table, memory table, control table, K-map cell input, asm output — anything dense + text-heavy
+- In-3D (`packages/hud`, uikit): floats with scene, follows camera, sharper than `Html`. Signal annotations, breakpoint pins.
+- DOM: editor, register table, memory table, control table, K-map cell input, asm output. Dense text-heavy.
 
 Both share design tokens.
 
 ## Keyboard-first
 
-Every action invocable without mouse:
-- Space: step / play-pause
-- Left / Right: prev / next cycle
-- R: reset
-- B: toggle breakpoint at cursor
-- 1-9: jump to bookmarked camera view
-- `:` (colon): open command palette
-- `/`: search registers / memory / signals
+Every action keyboard-invocable. Mouse acceleration not requirement. Full matrix in `A11Y.md`.
 
-Mouse is acceleration, never required.
+## Layout density modes
 
-## Layout density
+- **Survey**: 3D fills viewport, HUDs collapsed to edge dock
+- **Study**: 3D + register/memory/control panels visible
+- **Compare**: split-pane, synchronized scenes
 
-Modes:
-- **Survey**: 3D scene fills viewport, HUDs collapsed to edge dock
-- **Study**: 3D scene + register/memory/control tables visible side panel
-- **Compare**: split-pane, two scenes synchronized
-
-User toggles via keyboard. Default = Study on first load.
+Default Study. Keyboard toggle.
 
 ## Sound
 
-None. Silent product. No click sounds, no step sounds, no success chimes. Visual feedback is sufficient.
+None. Silent product. No clicks, no chimes. Visual feedback sufficient.
 
 ## Loading + Suspense
 
-- Initial 3D scene load behind drei `Loader` with subtle progress, no spinner, no "loading..." copy
-- Per-route streaming Suspense with skeleton geometry (low-poly placeholder) that morphs into full detail when ready
-- Asset preload hints from RSC (`packages/three-kit` exposes preload helpers)
+- Initial scene load: drei `Loader`, subtle progress, no "loading..." copy
+- Per-route streaming Suspense w/ skeleton geometry → full detail morph
+- Asset preload hints from RSC (three-kit `preload()` helpers)
 
 ## Empty / error states
 
-- Empty: a one-line domain prompt, never illustration, never "let's get started!"
-- Error: the failure quoted exact, the offending input shown, the next action implied — no apology, no recovery suggestion if the user already knows what to do
+- Empty: one-line domain prompt. No illustration. No "Let's get started!"
+- Error: failure quoted exact, offending input shown, next action implied. No apology.
 
 ## Accessibility
 
-- WCAG AA contrast minimum on every chrome / data surface
-- Full keyboard nav
-- Reduced motion respected
-- Focus rings visible (custom-styled but not removed)
-- Screen-reader labels on every interactive 3D element via aria attached to invisible DOM proxies
-- Color is never the only carrier of meaning (hazards = amber AND icon AND label)
+Per `A11Y.md`. WCAG AA contrast. Full keyboard nav. Reduced-motion respected. Visible focus rings (custom, not removed). Screen-reader proxies on every interactive 3D element. Color never sole carrier of meaning.
 
 ## Anti-patterns banned
 
 - Emojis in product copy
-- Achievement / progress / streak surfaces
-- Onboarding tutorials with forced step-through (a single inline hint on first sim load, dismissible, never returns)
+- Achievement / streak / progress surfaces
+- Onboarding tutorials w/ forced step-through (single inline hint OK, dismissible, never returns)
 - Confetti / celebration animations
-- "Pro tip" callouts
-- Sticky bottom-of-screen CTA bars
-- Modal popups for non-irreversible actions
-- Loading copy beyond skeleton geometry
-- Auto-rotating 3D scenes when idle (banned — calm by default)
+- Pro-tip callouts
+- Sticky bottom CTA bars
+- Modals for non-irreversible actions
+- Loading copy beyond skeleton
+- Auto-rotating 3D when idle
