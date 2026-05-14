@@ -6,11 +6,117 @@ Maximum concurrency + parallelism contract. Every compute path that can run in p
 
 | Worker | Count | Spawn |
 |---|---|---|
+| Sim worker (state machine + executor) | 1 | App boot (pre-warm) |
 | Render worker (OffscreenCanvas) | 1 per active 3D scene (compare mode = 2) | App boot |
 | Solver worker (QM / Petrick / Espresso) | `min(navigator.hardwareConcurrency - 1, 4)` with floor 2 | App boot (pre-warm) |
-| Pipeline analyzer worker | 1 | App boot (pre-warm) |
-| Assembler worker | 1 | First parse beyond inline threshold |
+| Pipeline analyzer worker pool | `min(navigator.hardwareConcurrency / 2, 2)` with floor 1 | App boot (pre-warm) |
+| Geometry generator worker | 1 | App boot (pre-warm) |
+| Assembler worker | 1 | App boot (pre-warm); handles all programs not just >100-line |
 | Shared worker (cross-tab compute reuse) | 1 per origin | First tab opens it |
+
+## Three-worker pipeline
+
+Main thread is pure input dispatcher + zustand UI state. All compute + render off main:
+
+```mermaid
+flowchart LR
+    Main[Main thread<br/>input dispatch zustand UI Convex client] -->|action| SimWorker[Sim worker<br/>state machine executor codec]
+    SimWorker -->|state diff via MessageChannel| RenderWorker[Render worker<br/>OffscreenCanvas R3F]
+    RenderWorker --> GPU[GPU]
+    SimWorker -->|telemetry batch| Main
+    Main -->|nav input| RenderWorker
+```
+
+Sim worker maintains `MachineState` (registers, memory, PC). Receives action (`step`, `run`, `reset`, `loadProgram`); emits new state. State diffs flow to Render worker via `MessageChannel` (no main-thread relay).
+
+Render worker maintains scene graph. Receives state diff; updates mesh positions, materials, emissive intensities; renders frame. Sends pointer-hit results back to Main.
+
+Main thread receives input, dispatches to Sim/Render via Comlink. Updates zustand for UI chrome. Handles Convex subscriptions.
+
+## Worker-to-worker MessageChannel
+
+Direct port between workers, established once at boot:
+
+```ts
+// Main creates port pair
+const { port1, port2 } = new MessageChannel();
+simWorker.postMessage({ kind: 'connect-render' }, [port1]);
+renderWorker.postMessage({ kind: 'connect-sim' }, [port2]);
+// After this, simWorker ↔ renderWorker communicate directly; main thread free.
+```
+
+Cuts inter-worker latency from ~2ms (main-thread relay) to <0.5ms (direct).
+
+## Concurrent shader compilation
+
+Three.js r155+ `Material.compileAsync(scene, camera)` enables non-blocking shader compile. Render worker queues all material compilations on scene mount; browser parallelizes across cores; render starts when first material ready.
+
+```ts
+const materials = scene.getMaterials();
+await Promise.all(materials.map((m) => renderer.compileAsync(m, camera)));
+```
+
+Combined with AOT shader cache from previous session (persisted via OPFS), repeat visits see zero shader compile cost.
+
+## Concurrent procedural geometry generation
+
+Heavy procedural geometry (datapath substrate, K-map toroidal surface, signal-pulse curve geometries) generated in Geometry worker. Transferred to Render worker via Transferable `Float32Array` (`vertices`, `normals`, `uvs`) and `Uint32Array` (`indices`).
+
+Main thread never touches geometry buffers; transfer is zero-copy.
+
+## Parallel pipeline hazard analysis
+
+Long programs (>50 instructions) shard hazard detection across Pipeline Analyzer Worker pool. Each worker analyzes a window of N instructions. Coordinator merges results for cross-window hazards (RAW spanning a window boundary).
+
+For shorter programs, single-worker pipeline analyzer handles end-to-end.
+
+## Parallel snapshot decode (`/me` page)
+
+Bulk load of N saved snapshots:
+
+```ts
+const decodedStates = await Promise.all(
+  snapshotHashes.map((hash) => decodeWorkerPool.acquire().decode(hash)),
+);
+```
+
+Solver worker pool repurposed for snapshot decode (codec is similar shape, workers idle when no solve in flight).
+
+## Concurrent zstd encoding for large snapshots
+
+For snapshot canonical bytes > 16KB, zstd encoding uses worker pool. Each worker compresses a chunk; concatenated. zstd supports parallel mode out-of-box.
+
+Small snapshots stay single-worker (parallel overhead exceeds savings under threshold).
+
+## Speculation triple-buffering during scrub
+
+Sustained timeline scrub triggers speculative pre-compute:
+1. Frame N rendered now (current cursor)
+2. Sim worker pre-computes frames N+1, N+2, N+3 in scrub direction during render idle gap
+3. Pre-computed frames cached in zustand transient
+4. User pointer moves to N+2 → instant render (no compute wait)
+
+Reverse on direction change. Cancelable via AbortSignal if scrub ends.
+
+## OPFS for solver result cache
+
+Solver results cached via Origin Private File System — async file I/O off main thread, larger budget than localStorage (~hundreds of MB).
+
+```ts
+const root = await navigator.storage.getDirectory();
+const handle = await root.getFileHandle(`qm-${hash}.json`, { create: true });
+const writable = await handle.createWritable();
+await writable.write(JSON.stringify(result));
+await writable.close();
+```
+
+Browser handles OPFS I/O async + concurrent. Cross-tab cache hit via SharedWorker reading same OPFS path.
+
+## WebGPU command encoder parallelism (when WebGPU primary)
+
+WebGPU `GPUDevice.createCommandEncoder()` allows multiple concurrent encoders. Render worker submits parallel command buffers (datapath scene + HUD overlay + critical-path highlight as separate encoders). GPU queue handles ordering.
+
+WebGL fallback path serializes by API design; WebGPU is the parallel gain.
 
 All workers pre-warmed at app boot per `PERFORMANCE.md` "Pre-warmed Worker pool" rule.
 
@@ -182,6 +288,15 @@ Idle work cancellable via `AbortSignal` if user navigation / interaction superse
 
 Server Actions + Route Handlers always `Promise.all` for independent fs / Convex / network ops.
 
+## Deferred-with-trigger ratchets
+
+| Ratchet | Trigger |
+|---|---|
+| Workerized Convex client (subscriptions in dedicated worker) | Main-thread cost of Convex subscription dispatch measurably exceeds 1ms p95 |
+| SharedArrayBuffer + Atomics for lock-free cross-worker state | COOP/COEP commitment per `adr/compute-budgets.md` SAB trigger |
+| WebGPU compute shaders for QM/Espresso solver | Solver workload exceeds CPU-worker partition budget |
+| Multi-region anycast for read latency | Single-region origin hits user-latency ceiling |
+
 ## Anti-patterns banned
 
 - Sequential `await` on independent operations (use `Promise.all`)
@@ -192,6 +307,13 @@ Server Actions + Route Handlers always `Promise.all` for independent fs / Convex
 - `setTimeout` for delay between work units (use `scheduler.yield()` + priority)
 - Saving without `navigator.locks.request` when concurrent tabs likely
 - Spurious `dependsOn` in turbo config serializing parallel work
+- Sim state machine on main thread (must run in Sim worker)
+- Inter-worker messages relayed through main thread (use MessageChannel direct port)
+- Synchronous shader compile (use `compileAsync`)
+- Procedural geometry generated on main thread (use Geometry worker + Transferable)
+- Bulk snapshot decode sequentially (parallelize via worker pool)
+- localStorage for solver result cache > 5MB (use OPFS)
+- Single command encoder on WebGPU when scene composes multiple independent passes (use parallel encoders)
 
 ## Caught by
 
@@ -204,3 +326,11 @@ Server Actions + Route Handlers always `Promise.all` for independent fs / Convex
 - SharedWorker smoke — QM result cache hit cross-tab
 - Compare mode smoke — 2 render workers spawned, both meet frame budget
 - Parallel solver smoke — 6-var QM completes within budget on K-worker partition
+- Three-worker pipeline smoke — sim worker step → render worker frame round-trip < 5ms
+- MessageChannel direct-port smoke — inter-worker latency < 0.5ms p95
+- `compileAsync` smoke — material list compiles in parallel, render starts on first-ready
+- Geometry worker transferable smoke — `Float32Array` ownership transfers zero-copy
+- Pipeline parallelism smoke — 100-instruction program shards across K workers within budget
+- Bulk snapshot decode smoke — 50 snapshots decoded in parallel within budget
+- OPFS cache hit smoke — solver re-run with same input returns cached result
+- WebGPU parallel encoder smoke — multi-pass scene submits without sequential lock
