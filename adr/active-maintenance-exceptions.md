@@ -2,9 +2,9 @@
 
 Per `book/HARD-RULES.md` "Active-maintenance dep gate" — every direct dep must have a publish (any dist-tag) within 6 months. This ADR lists the documented exceptions + rationale.
 
-Audit tool: `sim/tools/dep-audit/audit.ts` reads `simdocs/deps.json`, hits `registry.npmjs.org` for each, computes `max(time[ver])` across ALL `dist-tags` (latest / next / beta / alpha / canary / rc / etc.). A package counts as active if ANY tag publish is within 6 months.
+Audit tool: `sim/tools/dep-audit/audit.ts` reads `simdocs/deps.json`, hits `registry.npmjs.org` for each, computes `max(j.time[ver])` across **every published version** (excluding the special `created` / `modified` keys) — NOT constrained to `dist-tags`. The check answers "is the author still publishing anything?" rather than "is the chosen tag fresh?".
 
-## Exceptions (verified 2026-05-14)
+## Exceptions (verified 2026-05-14, 3 stale)
 
 ### espresso-iisojs
 
@@ -29,14 +29,6 @@ Latest: v2.13.1 (2025-07, 286d).
 Reason: operator pm4ai-stack locked. Git hook wiring is a stable problem (file at `.git/hooks/*`, run shell). Cadence is slow because nothing needs to change.
 
 Watch trigger: pm4ai upstream swaps it.
-
-### @auth/core
-
-Latest: v0.34.3 (2025-10, 196d).
-
-Reason: consumed transitively via `@convex-dev/auth` (active, byerag operator pattern). The `@auth/*` ecosystem is broadly active — `@auth/express` v0.12.2 + `@auth/sveltekit` v1.11.2 both 29d. `@auth/core` itself is on slower cadence because it's the underlying engine other auth wrappers depend on.
-
-Watch trigger: better-auth (pm4ai's preferred default) ships a Convex adapter with feature parity to `@convex-dev/auth`. At that point migrate the byerag pattern + this project together.
 
 ## Discipline
 
