@@ -201,7 +201,7 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 - Tab visibility pause — telemetry + idle compute paused when `document.visibilityState === 'hidden'`
 - Idle detection via `IdleDetector` (where available) or `requestIdleCallback` heuristic — non-critical compute paused on user idle
 - Workbox precache by revision keys (not URL) — bundle hash drives cache invalidation
-- `CompressionStream` / `DecompressionStream` for client-side zstd decode of snapshot bodies (Safari fallback to `fzstd` wasm)
+- `CompressionStream` / `DecompressionStream` (native) for client-side zstd decode of snapshot bodies; `Bun.zstdDecompress` / `Bun.zstdCompress` for server-side
 - `scheduler.yield()` inside extended `useFrame` work units — keeps frame budget elastic when heavy compute leaks into render path
 - `will-change` CSS audit — applied only to elements provably benefitting from compositor promotion, removed when no longer animating
 - HTTP/3 0-RTT enabled in Caddy config — instant resume for repeat visitors

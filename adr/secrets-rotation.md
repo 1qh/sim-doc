@@ -12,7 +12,7 @@ Every long-lived secret rotates on a documented cadence. Rotation procedures scr
 | Convex deploy key | Quarterly | Calendar + incident | `bunx convex auth rotate-deploy-key` |
 | Convex instance admin key | Quarterly | Calendar + incident | Convex CLI rotate |
 | Cloudflare API token | Annual | Calendar + incident | Generate new token, update operator secrets root, deploy |
-| Sentry DSN (when enabled) | n/a | Public, embedded in client; rotates on Sentry project rotation only | Generate new project, update env, redeploy |
+| Error reporter DSN (when enabled, non-Sentry) | n/a | Public, embedded in client; rotates on project rotation only | Generate new project, update env, redeploy |
 | Plausible API key (when self-host) | Annual | Calendar + incident | Plausible admin UI rotate |
 | Bootstrap admin emails | n/a | When admin set changes | Update `BOOTSTRAP_ADMIN_EMAIL` env, redeploy |
 | JWT signing keys (if added) | Quarterly | Calendar + incident | Per JWT rotation runbook (drafted when JWT lands) |

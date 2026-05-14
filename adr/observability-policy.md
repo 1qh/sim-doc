@@ -5,7 +5,7 @@
 Self-host aggregate-only privacy-respecting:
 - Plausible Analytics for page-view + aggregate event counts (self-host operator)
 - Structured JSON logs to stdout, captured by Dokploy log pipeline
-- Optional self-host Sentry (deferred unless triggered)
+- Optional platform-managed error reporter or error-boundary surfaces only (deferred unless triggered) — pm4ai bans `@sentry`, `@bugsnag`, `@honeybadger`, `rollbar`
 - Optional self-host Grafana + Prometheus (deferred unless triggered)
 - Optional OpenTelemetry tracing (deferred unless triggered)
 
@@ -43,7 +43,7 @@ PII redaction at boundary: emails, user IDs, OAuth tokens, request bodies contai
 
 ## Triggers to add deferred layers
 
-- Self-host Sentry: error rate exceeds operator-bearable diagnostic threshold via logs alone
+- Platform-managed error reporter (not Sentry/Bugsnag/Honeybadger/Rollbar per pm4ai): error rate exceeds operator-bearable diagnostic threshold via logs alone
 - Self-host Grafana: operator needs visual dashboards
 - OpenTelemetry: distributed tracing needed (low-priority for current scope)
 

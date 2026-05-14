@@ -45,7 +45,7 @@ return <Button>{t.actions.save}</Button>;
 
 - Replace `strings.ts` with locale-keyed entries
 - `useStrings()` becomes locale-aware via React context provider
-- Add `next-intl` or equivalent for routing locale prefixes (`/en/`, `/es/`, etc.)
+- Activate Next.js built-in i18n routing for locale prefixes (`/en/`, `/es/`, etc.) — `next-intl` / `react-i18next` / `react-intl` / `i18next` all banned per pm4ai
 - Add per-locale Intl formatters
 - Add hreflang metadata per route
 

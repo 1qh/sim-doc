@@ -31,7 +31,7 @@ Sim worker maintains `MachineState` (registers, memory, PC). Receives action (`s
 
 Render worker maintains scene graph. Receives state diff; updates mesh positions, materials, emissive intensities; renders frame. Sends pointer-hit results back to Main.
 
-Main thread receives input, dispatches to Sim/Render via Comlink. Updates zustand for UI chrome. Handles Convex subscriptions.
+Main thread receives input, dispatches to Sim/Render via thin typed-RPC wrapper. Updates zustand for UI chrome. Handles Convex subscriptions.
 
 ## Worker-to-worker MessageChannel
 
@@ -150,7 +150,7 @@ flowchart LR
 
 When a worker's owned queue empties, it polls sibling queues. First non-empty wins. Cross-pool steal eliminates idle workers when one workload spikes.
 
-Implementation: Comlink-bridged shared MessageChannel for steal coordination; each worker advertises idle state.
+Implementation: thin typed-RPC wrapper-bridged shared MessageChannel for steal coordination; each worker advertises idle state.
 
 ## Concurrent frustum culling
 

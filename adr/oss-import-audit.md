@@ -13,12 +13,12 @@ Hand-roll allowed only when:
 
 Hand-roll bans:
 - Cryptographic / hash code (`@noble/hashes` for blake3 ✓)
-- Compression (`fzstd` / native `CompressionStream` ✓)
+- Compression — `Bun.zstdCompress` / `Bun.zstdDecompress` server, native `CompressionStream` / `DecompressionStream` client. `fzstd` / `pako` / `fflate` banned.
 - Validation (`zod` v4 ✓)
-- JSON canonicalization (use `safe-stable-stringify` or `canonicalize`, never hand-roll)
-- Parser combinators (use `chevrotain` / `peggy` / `parsimmon`)
-- Worker RPC (`Comlink` ✓)
-- Worker pool (`workerpool` or equivalent)
+- JSON canonicalization (use `safe-stable-stringify`, never hand-roll)
+- Parser combinators (use `chevrotain`)
+- Worker RPC — hand-rolled thin typed wrapper over `postMessage` / `MessageChannel`. `Comlink` banned per pm4ai
+- Worker pool — hand-rolled thin scheduler over native `Worker` / `SharedWorker`. `workerpool` / `threads` / `tinypool` / `piscina` banned per pm4ai
 - Fuzzy search (`mini-search` / `fuse.js` / `fzf-for-js`)
 - Diff (`microdiff` / `deep-object-diff`)
 - Toposort (`toposort`)
@@ -37,6 +37,49 @@ Banned in this project's audit scope:
 - Any code-lint tool overlapping lintmax surface
 
 Per `adr/lint-baseline.md`. If a code-lint pattern not covered by lintmax surfaces during build, file upstream against `lintmax`; do not add tool to this project.
+
+## pm4ai banned-deps conformance
+
+The operator's pm4ai banned-deps catalog at `/Users/o/z/pm4ai/packages/pm4ai/src/banned.ts` is binding across this project. Every dep in `package.json` is asserted NOT to match any entry in `ALL_BANNED`. Mapping highlights:
+
+| Category | pm4ai locked replacement | What was banned |
+|---|---|---|
+| Worker RPC + pool | Native `Worker` / `MessageChannel` (hand-roll thin RPC) | `comlink`, `workerpool`, `threads`, `tinypool`, `piscina` |
+| Forms | `@tanstack/react-form` | `react-hook-form`, `formik`, `final-form`, `informed`, `@hookform/resolvers` |
+| Animation | `motion` (framer-motion rebrand) | `react-spring`, `@react-spring/*`, `gsap`, `anime`, `lottie-*`, `react-transition-group` |
+| Markdown frontmatter | `Bun.markdown` or `remark-frontmatter` | `gray-matter`, `markdown-it`, `marked`, `react-markdown`, `micromark`, `showdown`, `turndown` |
+| i18n | next.js built-in i18n + `Intl` | `next-intl`, `react-i18next`, `react-intl`, `i18next` |
+| Error tracking | Error boundary + platform-managed | `@sentry`, `@bugsnag`, `@honeybadger`, `rollbar` |
+| Components | `shadcn` + `cnsync` | `@radix-ui` (direct), `@mui`, `@chakra-ui`, `@mantine`, `antd`, `@nextui`, etc. |
+| Icons | `lucide-react` | `@fortawesome`, `@heroicons`, `@iconify`, `@tabler/icons-react`, `phosphor-react`, `react-icons` |
+| Tables | `@tanstack/react-table` | `ag-grid`, `react-table` |
+| Virtualization | `@tanstack/react-virtual` | `react-virtualized`, `react-virtuoso`, `react-window` |
+| Drag-and-drop | `@dnd-kit` | `react-beautiful-dnd`, `react-dnd`, `react-draggable`, `react-sortable-hoc` |
+| State | `zustand` (or `jotai`) | `redux`, `mobx`, `xstate`, `valtio`, `recoil`, `effector`, `immer`, `nanostores` |
+| Utilities | `es-toolkit` + native | `lodash`, `ramda`, `radash`, `remeda`, `underscore` |
+| Logging | `consola` or `logtape` | `winston`, `pino`, `debug`, `bunyan`, `log4js`, `signale` |
+| Date / time | Native `Intl` | `moment`, `dayjs`, `luxon`, `date-fns` (use `date-fns` only if granular date math beyond Intl) |
+| HTTP client | Native `fetch` or `ky` | `axios`, `got`, `node-fetch`, `superagent`, `wretch`, `ofetch` |
+| Cookies | `Bun.Cookie` or `better-auth` | `cookie`, `express-session` |
+| Build | Bun built-in transpiler + `tsdown` + Turbopack | `webpack`, `rollup`, `tsup`, `esbuild` (direct), `vite`, `@babel`, `@swc` |
+| Test | Bun test | `jest`, `vitest`, `mocha`, `ava` |
+| Hashing (non-crypto) | `Bun.CryptoHasher` | `crc`, `crc-32`, `md5`, `sha.js`, `hash-wasm`, `xxhash-wasm` |
+| Hash (blake3 specifically) | `@noble/hashes` (NOT in pm4ai banned list, not in Bun.CryptoHasher) | banned crypto-libs above |
+| Compression | `Bun.zstdCompress`/`Bun.zstdDecompress` (server), native `CompressionStream`/`DecompressionStream` (client) | `pako`, `fflate`, `jszip`, `lz-string`, `fzstd` (transitional) |
+| Glob | `Bun.Glob` | `fast-glob`, `glob`, `globby`, `micromatch`, `minimatch`, `tinyglobby` |
+| Validation | `zod` | `joi`, `ajv`, `arktype`, `superstruct`, `yup`, `valibot` |
+| UUIDs | `crypto.randomUUID()` or `Bun.randomUUIDv7` | `uuid`, `nanoid`, `cuid`, `cuid2`, `ulid`, `ksuid` |
+| Shell | `Bun.$` | `execa`, `shelljs`, `zx` |
+| Spawn | `Bun.spawn` | `cross-spawn`, `pidtree` |
+| Env | `Bun.env` + Zod + `.env` auto-load | `dotenv`, `cross-env`, `envalid`, `@t3-oss/env` |
+| TOML / YAML / CSV | `Bun.TOML`, `Bun.YAML`, `Bun.file` + string split | `@iarna/toml`, `js-yaml`, `yaml`, `csv-parse`, `papaparse` |
+| File ops | `Bun.file`, `Bun.write`, `node:fs` | `fs-extra`, `graceful-fs`, `mkdirp`, `rimraf`, `del` |
+| Cron | `Bun.cron` | `node-cron`, `cron`, `cron-parser` |
+| Image opt | `next/image` | `imagemin`, `jimp`, `sharp` (sharp is TEMPORARY-allowed via next-pwa) |
+
+Full source-of-truth: `/Users/o/z/pm4ai/packages/pm4ai/src/banned.ts`. Refresh per quarterly audit.
+
+CI gate: pm4ai itself runs a banned-deps check (`pm4ai status` reports violations). Project also runs `tools/lint/oss-import-first.ts` for project-local OSS-import discipline.
 
 ## Per-concern audit
 
@@ -117,13 +160,16 @@ Rejected alternatives:
 
 ### Worker pool + work-stealing
 
-Locked pick: `workerpool` (mature, MIT, active, ~10k weekly downloads, TS types) for base pool primitive.
+Locked pick: hand-rolled thin scheduler over native `Worker` / `SharedWorker`. pm4ai `worker` ban catalogs `comlink`, `workerpool`, `threads`, `tinypool`, `piscina`, `worker-threads-pool` — all worker-pool libraries are banned in operator's portfolio.
 
-Work-stealing extension layered on top — `workerpool` doesn't ship work-stealing natively; cross-pool steal is a thin adapter (`~50 LOC`) reading from sibling queues. Adapter justified since the pattern is too project-specific for generic OSS to fit cleanly.
+Implementation: ~50 LOC pool over native Workers + ~50 LOC work-stealing extension over sibling queues. Hand-roll justified per pm4ai banned-list — no permitted alternative.
+
+Worker RPC: ~30 LOC typed-RPC wrapper over `postMessage` / `MessageChannel` / `Transferable`. No `Comlink` (banned).
 
 Rejected alternatives:
-- `threads.js` — heavier, more abstractions
-- Hand-roll pool from scratch — re-derives lifecycle / message routing / queue logic that `workerpool` already battle-tests
+- `Comlink` — banned per pm4ai worker policy
+- `workerpool` — banned per pm4ai worker policy
+- `threads.js` / `tinypool` / `piscina` — banned
 
 ### Device tier detection
 
@@ -150,11 +196,20 @@ Custom grammars for MIPS asm + Boolean expression registered with shiki at build
 
 ### Markdown frontmatter parsing (MDX examples)
 
-Locked pick: `gray-matter` (npm, MIT, active). Standard for Next/MDX content frontmatter.
+Locked pick: `remark-frontmatter` (allowed via `remark`/`rehype` in pm4ai ALLOWED_STACK) + `remark-parse-frontmatter` for typed parsing.
+
+Rejected alternatives:
+- `gray-matter` — banned per pm4ai `markdown` policy
+- `Bun.markdown` — server-side option; remark pipeline preferred for `@next/mdx` integration
 
 ### Schema-driven form generation (settings panel, K-map input)
 
-Locked pick: `react-hook-form` + Zod resolver. Forms over Zod schemas. Both MIT, both active.
+Locked pick: `@tanstack/react-form` + Zod resolver. Forms over Zod schemas.
+
+Rejected alternatives:
+- `react-hook-form` — banned per pm4ai `forms` policy
+- `@hookform/resolvers` — banned (consumed by react-hook-form)
+- `formik` / `final-form` / `informed` — banned
 
 ### Date/time
 
@@ -166,7 +221,14 @@ Native `Intl.NumberFormat`. No library import.
 
 ### Animation engine
 
-Locked picks already in STACK: `framer-motion` (for DOM motion) + `@react-spring/three` (for R3F springs). Both MIT, both active. No hand-roll.
+Locked pick: `motion` (the framer-motion rebrand, present in pm4ai ALLOWED_STACK). Both DOM motion + R3F transitions via `motion`.
+
+For per-frame spring physics inside R3F `useFrame` (where `motion` doesn't fit), hand-rolled critically-damped spring (~30 LOC) using pooled `Vector3` per `adr/runtime-optimization-discipline.md`.
+
+Rejected alternatives:
+- `@react-spring/web` / `@react-spring/three` — banned per pm4ai `animation` policy
+- `react-spring` — banned
+- `gsap` / `anime` / `lottie-web` / `lottie-react` / `react-flip-move` / `react-transition-group` / `@formkit/auto-animate` — all banned
 
 ### State machine (sim-engine)
 

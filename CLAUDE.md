@@ -19,6 +19,7 @@ Every Claude session that touches this project runs in this exact order before a
    - `PERFORMANCE.md` — perf contract
    - `CONCURRENCY.md` — concurrency + parallelism contract
    - `DETERMINISM.md` — reproducibility contract
+   - `STACK.md` — locked picks + pm4ai banned-deps conformance
    - `STACK.md` — locked picks
    - `API-CONVENTIONS.md`, `GLOSSARY.md`, `OBSERVABILITY.md`
    - `AUTH.md`, `PERSISTENCE.md`, `DEPLOY.md`, `SECURITY.md`, `SCHEMAS.md`

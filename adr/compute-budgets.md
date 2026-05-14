@@ -15,7 +15,7 @@ Any compute > 16 ms on main thread runs in a Web Worker. Locked Workers:
 | `pipeline-analyzer.worker.ts` | Pipeline trace arrangement + hazard detection for long programs |
 | `assembler.worker.ts` | Asm parse + encode for programs > 100 lines (incremental for short) |
 
-Worker communication via `Comlink` (typed RPC over `postMessage`).
+Worker communication via hand-rolled thin typed-RPC wrapper over `postMessage` + `MessageChannel` (per `adr/oss-import-audit.md` — `Comlink` banned by pm4ai). ≤30 LOC RPC adapter.
 
 ## WASM consideration
 

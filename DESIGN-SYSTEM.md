@@ -163,7 +163,7 @@ Collapsible side panel. Used for register/memory/signal panes in `/datapath`. Ke
 - Esc closes
 - Focus trapped inside
 - Returns focus to opener on close
-- Animated in/out via `@react-spring/web`
+- Animated in/out via `motion` (the framer-motion rebrand)
 
 Banned: modals for non-irreversible actions.
 

@@ -35,7 +35,7 @@ No per-user funnel. No conversion tracking. No retargeting pixels. No third-part
 
 ## Error tracking
 
-Self-host Sentry OR none (per `adr/observability-policy.md`).
+Platform-managed error reporter OR error-boundary discipline only (per `adr/observability-policy.md`). pm4ai bans `@sentry`, `@bugsnag`, `@honeybadger`, `rollbar`.
 
 When enabled:
 - Source maps uploaded at build (private, not served to browser)

@@ -13,7 +13,7 @@ Every error code that crosses a server boundary or surfaces to the user. Typed e
 | `GONE` | 410 | "This share is no longer available." | Suggest creating a new share from current state |
 | `RATE_LIMITED` | 429 | "Too many actions. Wait a moment." | Auto-retry after retry-after header |
 | `CONFLICT` | 409 | "Another change happened. Refresh to see the latest." | Surface refresh button |
-| `INTERNAL` | 500 | "Something went wrong on our side." | Log + Sentry (when enabled), offer retry |
+| `INTERNAL` | 500 | "Something went wrong on our side." | Log + platform error reporter (when enabled), offer retry |
 | `SERVICE_UNAVAILABLE` | 503 | "The server is temporarily unavailable." | Auto-retry with exponential backoff up to 3 times |
 
 ## Client-side error codes
@@ -42,7 +42,7 @@ Every error code that crosses a server boundary or surfaces to the user. Typed e
 | `KMAP_INVALID_MINTERMS` | Minterm list has out-of-range or duplicate values | "Minterm out of range for {n}-variable function" |
 | `KMAP_TRUTH_TABLE_INCOMPLETE` | Truth table missing rows | "Truth table has {filled}/{required} rows filled" |
 | `KMAP_BOOLEAN_EXPR_PARSE` | Boolean expression syntax error | "Couldn't parse Boolean expression" |
-| `SIM_DETERMINISM_LEAK` | Internal — frame-N hash mismatch | Throw, log, report to Sentry; user sees `CLIENT_SIM_DIVERGED` toast |
+| `SIM_DETERMINISM_LEAK` | Internal — frame-N hash mismatch | Throw, log, report to platform error reporter; user sees `CLIENT_SIM_DIVERGED` toast |
 | `CODEC_VERSION_UNSUPPORTED` | Snapshot has unknown schema version | Throw, log; user sees `CLIENT_DECODE_FAILED` toast |
 | `CODEC_INTEGRITY_FAIL` | Hash mismatch on snapshot body | Throw, log; user sees `GONE` (treat as compromised) |
 

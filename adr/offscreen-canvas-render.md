@@ -15,14 +15,14 @@ Entire 3D rendering moves to a Web Worker via `OffscreenCanvas`. Main thread ret
 
 ```mermaid
 flowchart LR
-    Main[Main thread<br/>DOM input zustand Convex client RSC hydration] --> Postmessage[postMessage / Comlink]
+    Main[Main thread<br/>DOM input zustand Convex client RSC hydration] --> Postmessage[postMessage typed RPC wrapper]
     Postmessage --> Worker[Render Worker<br/>OffscreenCanvas R3F three drei TSL shaders]
     Worker --> GPU[GPU]
 ```
 
 ## Communication
 
-Comlink-typed RPC over `postMessage`:
+Hand-rolled thin typed-RPC wrapper over `postMessage` + `MessageChannel` (Comlink banned per pm4ai):
 
 ```ts
 // main

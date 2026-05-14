@@ -23,7 +23,7 @@ flowchart LR
 | Convex instance | local self-host container | separate self-host instance | separate self-host instance |
 | OAuth client | dev-client-id | staging-client-id | prod-client-id |
 | Plausible | local self-host or disabled | tracking on, separate site | tracking on |
-| Sentry | disabled | enabled if landed | enabled if landed |
+| Error reporter | disabled | enabled if landed | enabled if landed |
 | Cache TTLs | minimum (live editing) | production TTLs | production TTLs |
 | Rate limits | high (no throttle annoyance for solo dev) | production limits | production limits |
 | Logs | verbose, stdout | structured JSON to log pipeline | structured JSON to log pipeline |

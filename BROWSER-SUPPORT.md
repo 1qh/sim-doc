@@ -65,7 +65,7 @@ These define the maximum input sizes the product handles gracefully. Beyond thes
 - `core-js` for any missing ES2022 feature (rare, mostly Edge edge cases)
 - `BigInt` polyfill not needed (all supported browsers have it)
 - `structuredClone` polyfill not needed (all supported browsers have it)
-- Compression Streams API: fallback to `fzstd` wasm if missing (Safari < 17)
+- Compression Streams API: required for client zstd decode (locked browser matrix covers it natively; no wasm fallback needed)
 
 ## Caught by
 
