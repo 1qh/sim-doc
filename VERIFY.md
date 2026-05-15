@@ -324,9 +324,9 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### Accessibility — contrast + keyboard
 
-- [ ] `a11y.contrast.dark`
-- [ ] `a11y.contrast.light`
-- [ ] `a11y.contrast.color-blind`
+- [x] `a11y.contrast.dark`
+- [x] `a11y.contrast.light`
+- [x] `a11y.contrast.color-blind`
 - [ ] `a11y.keyboard.home`
 - [ ] `a11y.keyboard.mips`
 - [ ] `a11y.keyboard.kmap`
