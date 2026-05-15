@@ -193,7 +193,7 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [x] `test.property.sim-engine`
 - [x] `test.codec-roundtrip`
 - [x] `test.codec-hash-stability`
-- [ ] `test.crossmachine-hash`
+- [x] `test.crossmachine-hash`
 
 ### Replay codec
 
