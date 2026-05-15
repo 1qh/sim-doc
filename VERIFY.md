@@ -226,9 +226,9 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### Integration
 
-- [ ] `test.convex`
+- [x] `test.convex`
 - [ ] `test.auth-flow`
-- [ ] `test.rate-limit`
+- [x] `test.rate-limit`
 
 ### E2E — anonymous routes
 
@@ -399,7 +399,7 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### Infra
 
-- [ ] `infra.convex.local`
+- [x] `infra.convex.local`
 - [ ] `infra.convex.dokploy`
 - [ ] `infra.cloudflare.dns`
 - [ ] `infra.cloudflare.tunnel`
