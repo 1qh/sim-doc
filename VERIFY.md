@@ -254,20 +254,20 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### E2E — K-map 2D
 
-- [ ] `test.e2e.kmap-2d.v2-basic`
-- [ ] `test.e2e.kmap-2d.v3-basic`
-- [ ] `test.e2e.kmap-2d.v4-basic`
-- [ ] `test.e2e.kmap-2d.v4-dontcare`
-- [ ] `test.e2e.kmap-2d.v4-essential-pi`
-- [ ] `test.e2e.kmap-2d.v4-petrick`
-- [ ] `test.e2e.kmap-2d.v4-pos`
+- [x] `test.e2e.kmap-2d.v2-basic`
+- [x] `test.e2e.kmap-2d.v3-basic`
+- [x] `test.e2e.kmap-2d.v4-basic`
+- [x] `test.e2e.kmap-2d.v4-dontcare`
+- [x] `test.e2e.kmap-2d.v4-essential-pi`
+- [x] `test.e2e.kmap-2d.v4-petrick`
+- [x] `test.e2e.kmap-2d.v4-pos`
 - [ ] `test.e2e.kmap-2d.v4-multi-output`
 - [ ] `test.e2e.kmap-2d.v4-hazard`
 - [ ] `test.e2e.kmap-2d.v4-wrap`
 
 ### E2E — K-map 3D
 
-- [ ] `test.e2e.kmap-3d.v5-basic`
+- [x] `test.e2e.kmap-3d.v5-basic`
 - [ ] `test.e2e.kmap-3d.v5-wrap`
 - [ ] `test.e2e.kmap-3d.v5-petrick`
 - [ ] `test.e2e.kmap-3d.v6-basic`
