@@ -240,7 +240,7 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [ ] `test.e2e.anon.learn`
 - [ ] `test.e2e.anon.foundation`
 - [ ] `test.e2e.anon.share`
-- [ ] `test.e2e.share`
+- [x] `test.e2e.share`
 - [ ] `test.e2e.compare`
 
 ### E2E — pipeline hazards
