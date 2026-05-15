@@ -187,7 +187,7 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [ ] `test.unit.hud`
 - [x] `test.unit.sim-engine`
 - [ ] `test.unit.three-kit`
-- [ ] `test.unit.apps-web`
+- [x] `test.unit.apps-web`
 - [x] `test.property.bits`
 - [x] `test.property.boolean`
 - [x] `test.property.sim-engine`
