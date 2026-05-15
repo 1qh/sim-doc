@@ -142,17 +142,17 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 ### Format + lint
 
 - [x] `format` — `bun run fix` exits silent
-- [ ] `lint.disable-reasons` — `tools/lint/disable-reasons.ts`
+- [x] `lint.disable-reasons` — `tools/lint/disable-reasons.ts`
 - [x] `lint.no-school-refs` — `tools/lint/no-school-refs.ts`
 - [x] `lint.atemporal-docs` — `tools/lint/atemporal-docs.ts`
 - [x] `lint.no-fallback` — `tools/lint/zero-fallback.ts`
-- [ ] `lint.no-infinite-wait` — `tools/lint/check-no-infinite-wait.ts`
+- [x] `lint.no-infinite-wait` — `tools/lint/check-no-infinite-wait.ts`
 - [x] `lint.no-determinism-leak` — `tools/lint/no-determinism-leak.ts`
 - [x] `lint.substrate-boundary` — `tools/lint/substrate-boundary.ts`
 - [x] `lint.agent-first-output` — `tools/lint/agent-first-output.ts`
-- [ ] `lint.cloudflare-bearer` — `tools/lint/cloudflare-bearer.ts`
-- [ ] `lint.no-dangerous-html` — `tools/lint/no-dangerously-set-inner-html.ts`
-- [ ] `lint.no-third-party-trackers` — `tools/lint/no-third-party-trackers.ts`
+- [x] `lint.cloudflare-bearer` — `tools/lint/cloudflare-bearer.ts`
+- [x] `lint.no-dangerous-html` — `tools/lint/no-dangerously-set-inner-html.ts`
+- [x] `lint.no-third-party-trackers` — `tools/lint/no-third-party-trackers.ts`
 
 ### Type check
 
