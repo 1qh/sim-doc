@@ -168,7 +168,7 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### Codegen freshness
 
-- [ ] `gen.check`
+- [x] `gen.check`
 
 ### Spec-of-code drift
 
