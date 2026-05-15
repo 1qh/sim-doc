@@ -403,8 +403,8 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [x] `infra.convex.dokploy`
 - [x] `infra.cloudflare.dns`
 - [x] `infra.cloudflare.tunnel`
-- [ ] `infra.ci.actions-enabled`
-- [ ] `infra.ci.green-on-main`
+- [x] `infra.ci.actions-enabled`
+- [x] `infra.ci.green-on-main`
 - [x] `infra.repos.sim-pushed`
 - [x] `infra.repos.simdocs-pushed`
 - [ ] `infra.ledger.stale-empty`
