@@ -276,14 +276,14 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### Performance — bundle size
 
-- [ ] `perf.bundle-size.home`
-- [ ] `perf.bundle-size.mips`
-- [ ] `perf.bundle-size.kmap`
-- [ ] `perf.bundle-size.compare`
-- [ ] `perf.bundle-size.pipeline`
-- [ ] `perf.bundle-size.learn`
-- [ ] `perf.bundle-size.foundation`
-- [ ] `perf.bundle-size.share`
+- [x] `perf.bundle-size.home`
+- [x] `perf.bundle-size.mips`
+- [x] `perf.bundle-size.kmap`
+- [x] `perf.bundle-size.compare`
+- [x] `perf.bundle-size.pipeline`
+- [x] `perf.bundle-size.learn`
+- [x] `perf.bundle-size.foundation`
+- [x] `perf.bundle-size.share`
 
 ### Performance — Lighthouse
 
