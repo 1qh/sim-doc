@@ -382,25 +382,25 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 ### Local-first verification
 
 - [x] `verify.local`
-- [ ] `verify.bearer`
+- [x] `verify.bearer`
 - [x] `verify.fresh`
 
 ### Deploy verification
 
-- [ ] `smoke.deploy.home`
-- [ ] `smoke.deploy.mips`
-- [ ] `smoke.deploy.kmap`
-- [ ] `smoke.deploy.compare`
-- [ ] `smoke.deploy.pipeline`
-- [ ] `smoke.deploy.learn`
-- [ ] `smoke.deploy.share`
-- [ ] `smoke.share.dokploy`
-- [ ] `smoke.share.cloudflare-tunnel`
+- [x] `smoke.deploy.home`
+- [x] `smoke.deploy.mips`
+- [x] `smoke.deploy.kmap`
+- [x] `smoke.deploy.compare`
+- [x] `smoke.deploy.pipeline`
+- [x] `smoke.deploy.learn`
+- [x] `smoke.deploy.share`
+- [x] `smoke.share.dokploy`
+- [x] `smoke.share.cloudflare-tunnel`
 
 ### Infra
 
 - [x] `infra.convex.local`
-- [ ] `infra.convex.dokploy`
+- [x] `infra.convex.dokploy`
 - [x] `infra.cloudflare.dns`
 - [x] `infra.cloudflare.tunnel`
 - [ ] `infra.ci.actions-enabled`
