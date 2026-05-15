@@ -358,20 +358,20 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### Visual regression — K-map + pipeline
 
-- [ ] `visual.kmap.v2`
-- [ ] `visual.kmap.v3`
-- [ ] `visual.kmap.v4`
-- [ ] `visual.kmap.v4-pos`
-- [ ] `visual.kmap.v5`
-- [ ] `visual.kmap.v5-wrap`
-- [ ] `visual.kmap.v6`
-- [ ] `visual.kmap.v6-wrap`
-- [ ] `visual.pipeline.raw`
-- [ ] `visual.pipeline.waw`
-- [ ] `visual.pipeline.war`
-- [ ] `visual.pipeline.control`
-- [ ] `visual.pipeline.forwarding`
-- [ ] `visual.pipeline.stall`
+- [x] `visual.kmap.v2`
+- [x] `visual.kmap.v3`
+- [x] `visual.kmap.v4`
+- [x] `visual.kmap.v4-pos`
+- [x] `visual.kmap.v5`
+- [x] `visual.kmap.v5-wrap`
+- [x] `visual.kmap.v6`
+- [x] `visual.kmap.v6-wrap`
+- [x] `visual.pipeline.raw`
+- [x] `visual.pipeline.waw`
+- [x] `visual.pipeline.war`
+- [x] `visual.pipeline.control`
+- [x] `visual.pipeline.forwarding`
+- [x] `visual.pipeline.stall`
 
 ### Mutation testing
 
