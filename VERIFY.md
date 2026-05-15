@@ -287,14 +287,14 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### Performance — Lighthouse
 
-- [ ] `perf.lighthouse.home`
-- [ ] `perf.lighthouse.mips`
-- [ ] `perf.lighthouse.kmap`
-- [ ] `perf.lighthouse.compare`
-- [ ] `perf.lighthouse.pipeline`
-- [ ] `perf.lighthouse.learn`
-- [ ] `perf.lighthouse.foundation`
-- [ ] `perf.lighthouse.share`
+- [x] `perf.lighthouse.home`
+- [x] `perf.lighthouse.mips`
+- [x] `perf.lighthouse.kmap`
+- [x] `perf.lighthouse.compare`
+- [x] `perf.lighthouse.pipeline`
+- [x] `perf.lighthouse.learn`
+- [x] `perf.lighthouse.foundation`
+- [x] `perf.lighthouse.share`
 
 ### Performance — frame budget + heap
 
