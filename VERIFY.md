@@ -304,9 +304,9 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [x] `perf.frame-budget.compare`
 - [x] `perf.frame-budget.pipeline`
 - [x] `perf.frame-budget.foundation`
-- [ ] `perf.heap-leak.datapath-cycle`
-- [ ] `perf.heap-leak.kmap-cycle`
-- [ ] `perf.heap-leak.share-cycle`
+- [x] `perf.heap-leak.datapath-cycle`
+- [x] `perf.heap-leak.kmap-cycle`
+- [x] `perf.heap-leak.share-cycle`
 
 ### Accessibility — axe per route × variant
 
