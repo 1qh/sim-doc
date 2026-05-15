@@ -405,6 +405,6 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [ ] `infra.cloudflare.tunnel`
 - [ ] `infra.ci.actions-enabled`
 - [ ] `infra.ci.green-on-main`
-- [ ] `infra.repos.sim-pushed`
-- [ ] `infra.repos.simdocs-pushed`
+- [x] `infra.repos.sim-pushed`
+- [x] `infra.repos.simdocs-pushed`
 - [ ] `infra.ledger.stale-empty`
