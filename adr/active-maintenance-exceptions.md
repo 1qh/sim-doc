@@ -28,7 +28,7 @@ Watch trigger: if `@next/mdx` swaps its frontmatter plugin upstream, follow.
 
 Latest: v1.0.8 (2024-02, 810d).
 
-Reason: pure Espresso-II Boolean minimization algorithm port (genieacs, MIT, native TypeScript). No security surface, deterministic + tested. Algorithm itself is canonical from Espresso-II reference paper.
+Reason: pure Espresso-II Boolean minimization algorithm port (genieacs, MIT, native TypeScript). No security surface, deterministic + tested. Algorithm itself is canonical from Espresso-II reference paper. Actively wired in `packages/boolean/src/espresso.ts` for POS at width > 4 — handroll Q-M/Petrick blows up exponentially on dense maxterm sets (62 maxterms at width 6 hangs); espresso heuristic stays polynomial.
 
 Alternative scan: zero actively-maintained JS QM/Espresso libraries exist (verified May 2026).
 
