@@ -40,6 +40,7 @@ Every gate wrapped by ledger recorder (`make ledger` reports green-at-HEAD).
 
 | Gate | Command | Asserts |
 |---|---|---|
+| `spec.vision-coverage` | `tools/lint/spec-of-code/vision-coverage.ts` | every documented deliverable has a materially-asserting gate; zero placeholder-backed exports/scenes |
 | `spec.datapath` | `tools/lint/spec-of-code/datapath-diff.ts` | `MIPS-DATAPATH.md` tables match generated topology |
 | `spec.isa` | `tools/lint/spec-of-code/isa-diff.ts` | `MIPS-ISA.md` tables match generated ISA |
 | `spec.stack` | `tools/lint/spec-of-code/stack-presence.ts` | `STACK.md` picks consumed in source |
@@ -172,6 +173,7 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 
 ### Spec-of-code drift
 
+- [x] `spec.vision-coverage`
 - [x] `spec.datapath`
 - [x] `spec.isa`
 - [x] `spec.stack`
