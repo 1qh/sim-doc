@@ -62,4 +62,15 @@ Largely already built (current DatapathWorkspace editor). Owns Monaco. Free-form
 2. **Focus sandbox + encoding breakdown** — `/mips/[name]` becomes structured operand controls + register-value seeds + live datapath/reg/mem/control + encoding-fields panel + "open in assembly". Remove its editor drawer.
 3. **2D renderer + toggle** — data-driven SVG datapath (layout map + wire waypoints), `[2D|3D]` toggle (2D default, persisted), values-on-wires + bit-widths, shared state. Biggest new surface; do last.
 
+## 2D REF-FAITHFUL RECREATION (v2 — operator escalation, supersedes "creative redraw")
+Operator compared side-by-side with `ref/` (Vite app, `bunx vite` at root renders DatapathPage). Verdict: mine too different. New mandate = faithful ref superset, **only more never less** than ref.
+- **Colors (both 2D + 3D), ref dark-adapted**: Instruction-Memory + Register-File = yellow/khaki; Data-Memory = green; ALU + adders + all MUXes + Sign-Extend + Left-Shift + Control + ALUControl + IR = white/light; PC = grey; our extra gates = yellow. Shared `NODE_COLOR` map drives both renderers. 3D still photorealistic/cinematic (apply colors to metallic/bloom materials).
+- **Active wires = RED** (not cyan). **Control signals = BLUE**, routed/labeled at top & bottom edges like ref.
+- **Ports + anchored wiring**: RF (RR1/RR2/WR/WD/RD1/RD2), DM (Address/Write Data/Read Data), IM (Instruction/Address), ALU (2 inputs/result/`is0?`), muxes (0/1 inputs + select). Wires connect to the correct PORT, not node center. e.g. `Inst[25:21]→RR1`, `Inst[20:16]→RR2`, `Inst[15:11]→WR` (via RegDst mux), `Inst[15:0]→Sign Extend`.
+- **Instruction field ruler**: vertical opcode 31:26 / rs 25:21 / rt 20:16 / rd 15:11 / shamt 10:6 / funct 5:0 with live binary values + `Inst[..]` tap labels.
+- **Bus-width ticks**: `/5 /16 /32` slash-and-number marks on buses.
+- **Shapes**: MUX = "M U X" boxes; ALU = notched ALU shape w/ `is0?` + `ALU result`; adders = ALU-shape; Sign-Extend + Left-Shift = ovals.
+- **Keep our extras** (branch gates Zero/NOT/AND/AND/OR, encoding panel, operand sandbox, 2D/3D toggle) — superset, never drop.
+- Both modes stay graph-driven (one source); no drift.
+
 ## Done = every bullet above shipped, lintmax clean, 199 gates green at the live tree, visuals rebaselined, committed/pushed. Deploy only on operator's go.
