@@ -93,6 +93,11 @@ Three platforms × per-fixture. ubuntu-24.04-x86 (Linux + SwiftShader trace base
 | `structural.scene-graph` | scene-graph hash equality cross-platform |
 | `structural.draw-calls` | `renderer.info.render.calls` matches expected per fixture |
 
+## Pitfall
+
+- WebGL/WebGPU pixel output is not bit-identical across GPU vendors/drivers/OS — use per-platform auto-suffixed snapshot baselines, pair every pixel test with a structural scene-graph hash, and use SwiftShader for deterministic CPU-rendered trace baselines.
+- Playwright Linux runners ship different fontconfig than macOS, so canvas text rendering diverges — mask text overlays in canvas screenshots or bake SDF/MSDF geometry, and use cross-platform font subsets.
+
 ## Caught by
 
 - Playwright `toHaveScreenshot()` per fixture per platform

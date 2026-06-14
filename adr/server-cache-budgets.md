@@ -14,15 +14,12 @@ Next 16 `'use cache'` directive used aggressively for server-side memoization of
 | Critical-path computation per (instruction, delay-table) | `'use cache'` | hash of inputs | forever (content-addressed) |
 | Pipeline trace arrangement | `'use cache'` | hash of program + forwarding-mode + stall-mode | forever |
 | OG image generation | `Cache-Control: public, immutable` at edge + `'use cache'` at origin | content hash | forever |
-| Snapshot load (`loadSnapshot`) | Convex internal cache + edge cache | hash | forever (immutable) |
 | Sitemap | `'use cache'` | content version | rebuild on content change |
-| `mySnapshots` query | Convex reactive cache | userId | reactive invalidation |
 
 ## What's NOT cached
 
-- Auth-sensitive queries (`mySnapshots` only via Convex reactive cache, never server `'use cache'`)
 - Health check + readiness endpoints (`no-store`)
-- Per-user state of any kind
+- Visitor-local state (snapshots in `localStorage`, never on a server)
 - Any computation with non-deterministic output
 
 ## RSC fetch deduping via `cache()`
@@ -52,6 +49,6 @@ Default: Next's in-memory + filesystem cache. Multi-instance deployments share v
 
 ## Caught by
 
-- `tools/lint/use-cache-discipline.ts` asserts `'use cache'` only on pure-function modules + queries (no auth-touching code)
+- `tools/lint/use-cache-discipline.ts` asserts `'use cache'` only on pure-function modules
 - Cache hit ratio per cached operation tracked via OBSERVABILITY
 - Cache stampede test: 100 concurrent requests for same key → 1 origin compute, 99 cache hits

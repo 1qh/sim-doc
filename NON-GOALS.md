@@ -80,21 +80,21 @@ MIPS R3000, R4000, MIPS64, RISC-V, ARMv7, custom-academic ISAs. Out of scope.
 
 Trigger: second sim adoption with different ISA — extracts substrate ISA-engine primitive, builds new ISA as sibling product per substrate growth loop.
 
-## User accounts beyond minimum-viable auth
+## User accounts / authentication / server-side persistence
 
-Profile pages, user-to-user follows, comment threads, public profile galleries, leaderboards. Out of scope.
+No accounts, no login, no sessions, no server-stored user data. Every visitor is anonymous; snapshots live in the visitor's own browser and shares ride in the URL fragment. Profile pages, user-to-user follows, comment threads, public profile galleries, leaderboards are all out of scope.
 
-Trigger: explicit social product pivot.
+Trigger: explicit social or cross-device-account product pivot — would land as a new ADR introducing a backend with rejection rationale for the current pure-client model.
 
 ## Telemetry / per-user analytics
 
-Beyond aggregate counts (total sims run, total snapshots saved), no per-user tracking, no behavior analytics, no funnel analysis. Out of scope.
+Beyond cookieless aggregate counts (page views, anonymous interaction events), no per-user tracking, no behavior analytics, no funnel analysis. Out of scope.
 
 Trigger: privacy-respecting aggregate-only mode if surface ever needs them; never per-user.
 
 ## Paid tier / paywalls / subscription
 
-Product is free, anonymous-first, no paid features. Substrate is OSS. Out of scope.
+Product is free, anonymous-only, no paid features. Substrate is OSS. Out of scope.
 
 Trigger: substrate sustainability requires it — separate ADR with rejection rationale for current model.
 

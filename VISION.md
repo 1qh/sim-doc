@@ -46,7 +46,7 @@ Concrete: near-black background, single accent, machined-silicon material librar
 
 ## Audience
 
-Learners exploring low-level computer architecture and digital logic. Anonymous by default. Login optional, sole purpose cross-device persistence. See `USERS.md`, `AUTH.md`.
+Learners exploring low-level computer architecture and digital logic. Anonymous-only — no accounts, every feature available to every visitor. See `USERS.md`.
 
 ## Floor, never ceiling
 

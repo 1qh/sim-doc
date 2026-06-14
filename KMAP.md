@@ -99,7 +99,7 @@ Saved K-map state includes:
 - Selected solver options (multi-output, hazard analysis, gate style)
 - 3D mode camera bookmark
 
-Snapshot serialized via `sim-engine` codec, shareable via tier-1 URL-fragment if small, tier-2 Convex hash otherwise.
+Snapshot serialized via `sim-engine` codec, shareable via URL fragment; states too large for a fragment are non-shareable by design (tier `'oversize'`).
 
 ## Caught by
 

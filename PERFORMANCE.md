@@ -51,7 +51,7 @@ Refresh-rate detection at canvas mount via `screen.refreshRate` (or `matchMedia(
 | Editor-route bundle | ≤ 500 KB gzip (Monaco dynamic-imported) | bundle-size CI gate |
 | 3D-route bundle | ≤ 400 KB gzip (three + drei + product features) | bundle-size CI gate |
 | CSS shipped per route | ≤ 25 KB gzip | bundle-size CI gate |
-| Per-request JSON payload | ≤ 4 KB gzip (snapshot reads) | Route Handler smoke |
+| Per-request JSON payload | ≤ 4 KB gzip (search index, OG metadata) | Route Handler smoke |
 | Font subset (initial) | Latin + math + Boolean symbols only, ≤ 30 KB woff2 | Font loading hook |
 | Font additional weights | Lazy-loaded after first paint, ≤ 50 KB total | Font loading hook |
 | Image / texture | All procedural; zero external textures | Repo-asset lint |
@@ -61,7 +61,7 @@ Refresh-rate detection at canvas mount via `screen.refreshRate` (or `matchMedia(
 | Operation | Budget |
 |---|---|
 | `step(state)` single-cycle MIPS | ≤ 1 ms per cycle |
-| `canonicalize(state)` + `blake3(bytes)` | ≤ 10 ms for typical snapshot |
+| `canonicalize(state)` + `compress(bytes)` | ≤ 10 ms for typical snapshot |
 | `deserialize(bytes)` | ≤ 5 ms |
 | Quine-McCluskey 4-var | ≤ 5 ms |
 | Quine-McCluskey 6-var | ≤ 50 ms (Web Worker, off main thread) |
@@ -99,8 +99,8 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 |---|---|
 | Protocol | HTTP/3 (QUIC) preferred, HTTP/2 fallback. Caddy + Cloudflare both support. |
 | Compression | Brotli level 6 (balance between ratio and CPU). gzip fallback. |
-| CDN cache hit ratio | ≥ 95% (content-addressed share paths → effectively 100%) |
-| Resource hints | `<link rel="preconnect">` to Convex + Cloudflare; `<link rel="preload">` for critical fonts + above-fold assets |
+| CDN cache hit ratio | ≥ 95% (static routes + immutable assets → effectively 100%) |
+| Resource hints | `<link rel="preconnect">` to Cloudflare; `<link rel="preload">` for critical fonts + above-fold assets |
 | HTTP/3 0-RTT | Enabled where supported |
 
 ## Build + DX perf
@@ -163,7 +163,6 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 - `fetchpriority="high"` on critical fonts + above-fold 3D bundle
 - View Transitions API for cross-route navigation (Next 16 native)
 - Speculation Rules API — prerender likely-next routes on hover/idle (per `adr/speculative-loading.md`). **Gate analytics on `document.prerendering === false` + listen for `prerenderingchange`** to avoid double-counting on prerender.
-- Stale-while-revalidate at CDN — survive flagged-then-purge edge race for permalink reads
 - Preemptive scrub seeking — when user drags timeline scrubber, pre-compute frames ahead of cursor in idle gap
 - Service Worker pre-caching of likely-next-routes on idle (PWA layer)
 - OffscreenCanvas + R3F-in-Worker — entire 3D rendering off main thread (per `adr/offscreen-canvas-render.md`)
@@ -175,7 +174,7 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 - Iterative (not recursive) QM + Petrick implementation
 - Scheduler API (`scheduler.postTask` with explicit priorities) for compute dispatch
 - `await scheduler.yield()` between work units in long-running hot paths
-- `requestIdleCallback` for telemetry batching, abuse-flag scrubs, catalog index updates
+- `requestIdleCallback` for telemetry batching, catalog index updates
 - Mesh batching via `BufferGeometry.mergeGeometries` for static datapath substrate elements
 - Programmatic LOD via drei `Detailed` — simpler geometry at distance
 - `renderer.autoClear = false` with manual clear of only-dirty regions
@@ -201,12 +200,12 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 - Tab visibility pause — telemetry + idle compute paused when `document.visibilityState === 'hidden'`
 - Idle detection via `IdleDetector` (where available) or `requestIdleCallback` heuristic — non-critical compute paused on user idle
 - Workbox precache by revision keys (not URL) — bundle hash drives cache invalidation
-- `CompressionStream` / `DecompressionStream` (native) for client-side zstd decode of snapshot bodies; `Bun.zstdDecompress` / `Bun.zstdCompress` for server-side
+- `CompressionStream` / `DecompressionStream` (native) for client-side zstd encode + decode of share fragments
 - `scheduler.yield()` inside extended `useFrame` work units — keeps frame budget elastic when heavy compute leaks into render path
-- `will-change` CSS audit — applied only to elements provably benefitting from compositor promotion, removed when no longer animating
+- `will-change` CSS audit — applied only to elements provably benefitting from compositor promotion, cleared once the element settles
 - HTTP/3 0-RTT enabled in Caddy config — instant resume for repeat visitors. **Never for POST / mutation requests** — Chrome 145+ surfaces 425 Too Early to JS rather than retry. GET/HEAD/OPTIONS only.
 - Cross-Origin-Resource-Policy (CORP) header on served assets — `same-origin` for product, `cross-origin` for substrate OSS bundles when shareable
-- Resource Timing API client-side aggregation → `/api/rum` — per-asset latency, cache state, transfer size for tuning. `Timing-Allow-Origin: *` required on Convex + CF responses for cross-origin phases to be visible to JS.
+- Resource Timing API client-side aggregation → `/api/rum` — per-asset latency, cache state, transfer size for tuning. `Timing-Allow-Origin: *` required on Cloudflare CDN responses for cross-origin phases to be visible to JS.
 - Network Information API (`navigator.connection`) — Chromium-only (Firefox/Safari don't expose). Server-side `Save-Data` HTTP header gate is more reliable; `effectiveType` slow-2g/2g/3g/4g + `saveData=true` disables prerender, downgrades render quality, suppresses non-critical prefetch
 - `pointerrawupdate` events for input on high-refresh displays — uncoalesced pointer events for smooth scrub on 120Hz+
 - `<link rel="modulepreload">` for code-split bundles — bridges preload (eager) and prefetch (lazy); applied to next-likely route bundles
@@ -259,6 +258,15 @@ Memory leak detection via Playwright `page.coverage` + heap snapshot diff betwee
 | Skia / CanvasKit via wasm | Browser Canvas2D measurably bottlenecks any UI surface (unlikely with 3D-dominant product) |
 | CPU affinity for server workers | Operator commits to per-core tuning; current default scheduling hits CPU contention |
 | ImportMap-based runtime module sharing | Substrate ships as separately-versioned npm artifacts (post extract-on-second-use) |
+
+## Pitfall
+
+- Browsers expose no compiled-shader binaries to JS (WebGL no program binaries, WebGPU no `getCachedPipeline`) — OPFS shader-binary caching is impossible; rely on `Material.compileAsync` + browser-internal pipeline cache, persist only TSL source.
+- HTTP/3 0-RTT cannot safely carry POST/mutations (Chrome 145+ surfaces 425 Too Early; replay risk) — restrict 0-RTT to GET/HEAD/OPTIONS; configure Caddy to disable 0-RTT for unsafe methods.
+- Cross-origin `Server-Timing` and resource-timing phases are invisible to JS without `Timing-Allow-Origin` — emit `Timing-Allow-Origin: *` on all CDN responses.
+- Early Hints status is `103`, not `104` — assert `103` in smoke.
+- Long Animation Frames (LoAF, Chrome 123+) supersede longtask for RUM (adds script attribution + render + blocking durations) — observe `long-animation-frame` with a longtask fallback for older browsers.
+- INP ≤ 16ms p75 is unrealistic across compositor-blocking interactions (one ≥16ms paint torpedoes CrUX p75) — use a tiered target: 16ms median / 50ms p75 / 100ms p95.
 
 ## Caught by
 

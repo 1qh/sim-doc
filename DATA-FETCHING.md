@@ -1,6 +1,6 @@
 # DATA-FETCHING
 
-Decision matrix for every server-touching component.
+Decision matrix for every data-touching component. Pure-client app — no backend, no server-side persistence; data is static, computed, or read from the visitor's browser.
 
 ## Fetch primitives
 
@@ -8,13 +8,13 @@ Decision matrix for every server-touching component.
 mindmap
   root((Data fetching))
     Server side
-      RSC server component fetch
-      Server Action mutation
+      RSC server component read
+      Server Action pure compute
       Route Handler
     Client side
-      Convex reactive query
-      Convex mutation client
-      use hook unwrap promise
+      localStorage snapshot list
+      URL-fragment share decode
+      react-query compute memo
     Edge cached
       Static at build
       Cache headers for CDN
@@ -25,13 +25,13 @@ mindmap
 | Need | Primitive | Why |
 |---|---|---|
 | Initial page render data | RSC | Streams from server, smallest client bundle, SEO-friendly |
-| Real-time updates (saved-snapshots list when user opens `/me`) | Convex reactive query | Live updates as data changes |
-| One-shot write (saveSnapshot, claimAnonSnapshots, flagAbuse) | Server Action | Co-located with form, typed, progressive enhancement |
+| Local snapshot list (`/me`) | Client `localStorage` read | Snapshots live in the visitor's own browser |
 | Heavy computation (Quine-McCluskey for 6-var) | Server Action with `'use cache'` | Cache by input hash, offload from client |
+| Client compute memoization | `@tanstack/react-query` | Cache pure assemble/solve results by input hash in the client |
 | Build-time content (learn pages, examples) | RSC + static generation | Zero runtime cost |
-| Snapshot load (`/s/[hash]`) | RSC + Cloudflare edge cache | Content-addressed = forever-cacheable |
+| Shared snapshot load (`/s/[hash]`) | Client URL-fragment decode | Whole state rides in the URL fragment, no network |
 | OG card | Route Handler with `ImageResponse` | Dynamic per hash, edge-cacheable |
-| Web Vitals reporting | Route Handler `/api/rum` | Aggregate-only, fire-and-forget |
+| Web Vitals reporting | Route Handler `/api/rum` | Cookieless aggregate, fire-and-forget |
 | Health check | Route Handler `/api/healthz` | Per `adr/health-check.md` |
 | Search index (command palette) | Build-time JSON + client lazy load | Static, ~50 KB, fuzzy-search-able |
 | Sitemap | Route Handler `/sitemap.xml` | Dynamic from MDX content discovery |
@@ -50,88 +50,80 @@ export default async function DatapathPage({ searchParams }) {
 }
 ```
 
-## Server Action pattern
+## Server Action pattern (pure compute)
 
 ```ts
-// app/datapath/actions.ts
+// app/kmap/actions.ts
 'use server';
 
-export async function saveSnapshotAction(state: SnapshotInput) {
-  const parsed = SnapshotSchema.parse(state); // Zod validate
-  const bytes = canonicalize(parsed);
-  if (bytes.length <= 1024) return { ok: true, urlFragment: encodeFragment(bytes) };
-  const hash = await convex.mutation(api.snapshots.saveSnapshot, { hash: blake3(bytes), bytes });
-  return { ok: true, hash };
+export async function solveAction(input: TruthTableInput) {
+  const parsed = TruthTableSchema.parse(input); // Zod validate
+  return quineMcCluskey(parsed); // pure, 'use cache' keyed on input hash
 }
 ```
 
 Consumer:
 ```tsx
-const [state, action, pending] = useActionState(saveSnapshotAction, null);
+const [state, action, pending] = useActionState(solveAction, null);
 ```
 
-## Convex reactive query pattern
+## Local snapshot pattern
 
 ```tsx
-// /me page (signed-in)
-const snapshots = useQuery(api.snapshots.mySnapshots, { cursor: null });
-// re-renders automatically as new saves land
+// /me page — client component
+const snapshots = useLocalSnapshots(); // reads localStorage, reactive to storage events
 ```
 
-## Route Handler pattern
+## Share decode pattern
 
 ```ts
-// app/s/[hash]/route.ts
-export async function GET(_: Request, { params }: { params: { hash: string } }) {
-  const snapshot = await convex.query(api.snapshots.loadSnapshot, { hash: params.hash });
-  if (!snapshot) return new Response('not found', { status: 404 });
-  if (snapshot.abuseFlag) return new Response('gone', { status: 410 });
-  return Response.json(snapshot, {
-    headers: { 'cache-control': 'public, immutable, max-age=31536000, s-maxage=31536000' },
-  });
+// app/s/[hash]/share.ts — client
+export function decodeShare(fragment: string): SimState {
+  const bytes = base64urlDecode(fragment);
+  return deserialize(inflate(bytes)); // DecompressionStream, fully client-side
 }
 ```
+
+States too large for a URL fragment are tier `'oversize'` — the encoder returns no link.
 
 ## Cache strategy
 
 | Surface | Cache layer |
 |---|---|
 | Static routes (landing, learn) | CF edge + Next ISR-equivalent |
-| `/s/[hash]` | CF edge forever-cached (content-addressed) |
 | `/api/og/*` | CF edge forever-cached per hash |
 | `/api/healthz` | `no-store` |
-| `/me` page | `no-store`, signed-in only |
-| Convex reactive queries | Convex internal cache + client subscription |
-| Server Action results | `'use cache'` directive with content hash as key when applicable |
+| `/me` page | client-rendered from `localStorage` |
+| Server Action compute results | `'use cache'` directive with content hash as key |
+| Client compute results | `@tanstack/react-query` cache, content hash as key |
 
 ## Banned
 
-- `fetch()` calls in client components for in-app data (use Convex client)
-- Client-side data fetching libraries (TanStack Query, SWR) — Convex client already provides reactive cache
+- `fetch()` calls in client components for in-app data — there is no backend to fetch from
 - Server-side fetch loops without `AbortSignal.timeout(ms)` per `book/HARD-RULES.md` "Every wait loop has a deadline"
 - Cross-route data prop drilling (use route segment loaders or context)
-- N+1 query patterns (batch via Convex `Promise.all` or denormalize)
+- Any server-side persistence of visitor state
 
 ## Optimistic updates
 
-`useOptimistic` from React 19 for any user-initiated mutation:
+`useOptimistic` from React 19 for any user-initiated local action:
 
 ```tsx
 const [optimistic, addOptimistic] = useOptimistic(snapshots, (curr, newOne) => [...curr, newOne]);
 ```
 
-Used on save (preview appears instantly, server confirms async).
+Used on local save (preview appears instantly).
 
 ## Suspense boundaries
 
-Every data fetch is wrapped in Suspense at the appropriate level:
+Every data read is wrapped in Suspense at the appropriate level:
 - Page-level boundary for initial data
 - Component-level boundary for incremental data
 - Streaming SSR enabled per route
 
 ## Caught by
 
-- `tools/lint/no-client-fetch.ts` greps client components for raw `fetch()` (allows only Convex / Server Action consumption)
+- `tools/lint/no-client-fetch.ts` greps client components for raw `fetch()` of in-app data
 - Smoke: each surface returns expected cache headers
-- E2E: optimistic updates roll back on server error
+- E2E: optimistic updates roll back on Server Action error
 - Performance test: Suspense boundaries serve initial paint within `LCP` budget

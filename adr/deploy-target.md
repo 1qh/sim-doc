@@ -3,8 +3,7 @@
 ## Decision
 
 Dokploy VM (operator's existing infrastructure) hosts:
-- Next.js standalone output
-- Convex self-host backend instance
+- Next.js standalone output (static client app)
 - Caddy reverse proxy with cache module
 
 Cloudflare provides DNS + edge cache (bearer-mode, stateless, public-immutable content only).
@@ -16,8 +15,6 @@ flowchart LR
     User[User browser] --> CF[Cloudflare CDN bearer cache]
     CF --> Caddy[Caddy reverse proxy on Dokploy VM]
     Caddy --> Next[Next standalone container]
-    Caddy --> Convex[Convex self host container]
-    Next --> Convex
 ```
 
 ## Why
@@ -28,10 +25,10 @@ flowchart LR
 
 ## Bootstrap
 
-`tools/bootstrap-mac.sh` (per operator's reference Convex+auth project pattern in memory):
+`tools/bootstrap-mac.sh`:
 - Verifies bun, docker, dokploy CLI installed
 - Reads operator-original credentials from single secrets root (per `book/HARD-RULES.md` "Single secrets root")
-- Configures `.env` from secrets — `CONVEX_SELF_HOSTED_URL`, `SITE_URL`, `BOOTSTRAP_ADMIN_EMAIL`, OAuth client secrets
+- Configures `.env` from secrets — `SITE_URL`, Cloudflare API token, optional Plausible + error-reporter values
 - Runs `compose up` locally OR `dokploy deploy` against the operator's VM
 
 Bootstrap is idempotent. Re-run on a green machine = no-op.
@@ -40,14 +37,14 @@ Bootstrap is idempotent. Re-run on a green machine = no-op.
 
 Allowed:
 - DNS proxy (CNAME + A records)
-- CDN cache for content-addressed immutable paths (`/s/[hash]` snapshots, static assets)
+- CDN cache for content-addressed immutable paths (static assets, app bundles)
 - TLS termination at edge
 
 Banned:
 - Cloudflare Workers (vendor-managed compute, `book/PHILOSOPHY.md` "Banned: provider-managed primitives without a self-hostable equivalent")
 - Cloudflare KV, D1, R2 Worker bindings, Pages Functions, Durable Objects
 - `CF-`-prefixed cache tags or any vendor-locked feature
-- Persisting any user identifier at Cloudflare
+- Persisting any visitor identifier at Cloudflare
 
 ## Verifier targets
 

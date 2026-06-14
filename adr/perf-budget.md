@@ -6,7 +6,7 @@ Bundle-size + Lighthouse-CI + frame-budget + heap-leak gates. Per-route budgets 
 
 ## Bundle-size CI gate
 
-`size-limit` + `andresz1/size-limit-action` for PR comment (bundlesize2 is unmaintained as of 2022). Config:
+`size-limit` + `andresz1/size-limit-action` for PR comment. Config:
 
 ```js
 // .size-limit.cjs

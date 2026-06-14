@@ -13,8 +13,8 @@ flowchart TD
     Foundation --> ProductCore[Product feature cores — ISA decoder, snapshot codec, Boolean solver]
     ProductCore --> ProductUI[Product 3D scenes + HUDs]
     ProductUI --> Polish[Critical path, compare, pipeline overlays]
-    Polish --> Persistence[Persistence + share permalink]
-    Persistence --> Deploy[Dokploy + Cloudflare + Convex deploy]
+    Polish --> Share[Share — URL-fragment encode + decode]
+    Share --> Deploy[Static client app + Cloudflare]
 ```
 
 No phased "ship MVP, polish later" carve-outs. Floor never ceiling.
@@ -47,7 +47,7 @@ Caught by: commit path lint — staged paths must match one of `packages/*` (sub
 
 ## Self-host first, no managed-primitive lock-in
 
-Every infrastructure pick has a self-host equivalent that runs in compose locally with the same Helm chart in cluster. Bearer-mode third parties (Cloudflare CDN, Convex Cloud if ever adopted) are accelerants additive on top of self-host, never required for the system to function.
+Every infrastructure pick has a self-host equivalent that runs in compose locally with the same Helm chart in cluster. Bearer-mode third parties (Cloudflare CDN) are accelerants additive on top of self-host, never required for the system to function.
 
 Caught by: `make verify.local` (pure self-host) AND `make verify.bearer` (with bearer accelerants) both green in CI.
 
@@ -55,11 +55,11 @@ Caught by: `make verify.local` (pure self-host) AND `make verify.bearer` (with b
 
 Every item in `REQUIREMENTS.md` ships. Items in `NON-GOALS.md` are deferred with explicit trigger. No third state. Items not in either doc that surface during build are surfaced as MCQs to land into one of the two.
 
-## Anonymous-first, never login walls
+## Anonymous-only, no identity layer
 
-Every sim, every save, every share works without identity. Signin is optional accent in the nav corner, sole purpose cross-device persistence. No modals, no walls, no nags. Per `AUTH.md`.
+Every sim, every local save, every share works with no identity. There are no accounts, no login, no sessions — every visitor is anonymous. No modals, no walls, no nags. Per `USERS.md`.
 
-Caught by: route-handler smoke test asserts every interactive surface returns full functionality with no auth cookie.
+Caught by: smoke test asserts every interactive surface returns full functionality for an anonymous visitor.
 
 ## Determinism mandate
 

@@ -22,9 +22,8 @@ Anything older: served a minimal HTML page with one line — "this app requires 
 - WebGPU (preferred, optional)
 - `BigInt` (used in some 64-bit-shaped computations)
 - `structuredClone` (used in sim state copying)
-- `Web Crypto API` (for blake3 in `packages/sim-engine`)
-- `Compression Streams API` (for zstd alternative — fallback to wasm if absent)
-- IndexedDB (for offline save queue + localStorage backup)
+- `Compression Streams API` (for gzip-encoding the share fragment — fallback to wasm if absent)
+- IndexedDB (for localStorage backup)
 - Service Workers (for `adr/offline-pwa.md`)
 - Web Workers (for solver computations off main thread)
 
@@ -57,7 +56,7 @@ These define the maximum input sizes the product handles gracefully. Beyond thes
 | Pipeline trace cycles | 1,000 (UI renders, scroll for more) |
 | Pipeline trace instructions | 100 (UI renders compact) |
 | Snapshot body uncompressed | 256 KB |
-| Snapshot body compressed (tier-2) | 64 KB hard cap |
+| URL-fragment share payload (gzipped, base64url) | 64 KB hard cap — beyond this the state is non-shareable (tier `'oversize'`) |
 | Anonymous saves in localStorage | 100 (LRU eviction beyond) |
 
 ## Polyfills

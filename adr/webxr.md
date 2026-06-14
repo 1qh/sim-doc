@@ -73,6 +73,11 @@ Substrate rule: wrap `<EffectComposer>` in `<XRConditional>` and pass a reduced 
 - **Camera bookmarks → teleport targets** is the recommended pattern
 - For K-map torus: inside-the-torus viewpoint is high-value novelty — combine with scale-to-grasp affordance (shrink to grasp, expand to walk inside)
 
+## Pitfall
+
+- `WebGPURenderer` cannot drive a WebXR session — three's `XRManager` is WebGL2-only (#28968, #30806); `Renderer.create({ xrRequested })` returns `WebGLRenderer` when XR is requested, decided at mount since renderer swap mid-session is infeasible.
+- Apple Vision Pro visionOS 2 is VR-only with no exposed 25-joint hand skeleton (Natural Input: gaze + pinch) — design a VR-only path with gaze + pinch as first-class input; never gate UX on an AR module or pose-recognition skeleton.
+
 ## Caught by
 
 - Substrate compatibility lint: `packages/three-kit` source `Renderer.create()` accepts `xrRequested` flag + correct renderer selection

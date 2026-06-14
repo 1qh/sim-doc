@@ -1,51 +1,45 @@
 # OBSERVABILITY
 
-Self-host, aggregate-only, privacy-respecting. Per `adr/observability-policy.md`.
+Self-host, aggregate-only, privacy-respecting. Client-side telemetry only — there is no backend to observe. Per `adr/observability-policy.md`.
 
-## Logs
+## Server logs
 
-Structured JSON to stdout, captured by Caddy + Dokploy log pipeline. Every log line:
+The only server is static client delivery. Caddy + Dokploy capture access logs for the static origin:
 
 ```json
 {
-  "ts": "2026-05-14T09:12:33.123Z",
+  "ts": "...",
   "level": "info | warn | error",
-  "service": "next-app | convex-backend | caddy",
-  "op": "saveSnapshot | loadSnapshot | render | ...",
+  "service": "caddy",
+  "op": "asset-serve | route-serve",
   "duration_ms": 12,
-  "outcome": "ok | error",
-  "errCode": "INVALID_INPUT | RATE_LIMITED | ..." | null,
-  "redacted_fields": ["..."]
+  "outcome": "ok | error"
 }
 ```
 
-PII never logged. No emails, no user IDs in plaintext (hash if identification needed for correlation).
-
-Errors quoted exact in dev; redacted in prod.
+No PII is ever logged — none is collected. No emails, no user IDs, no identifiers of any kind exist to log.
 
 ## Metrics
 
-Self-host Plausible Analytics (privacy-respecting, no cookies, DNT-respecting):
+Cookieless Plausible Analytics (privacy-respecting, no cookies, DNT-respecting):
 - Page view per route (aggregate counts only)
-- Event: snapshot saved (no content, no identity)
-- Event: example loaded
-- Event: signin (count only)
+- Custom interaction events (see `TELEMETRY-EVENTS.md`)
 
 No per-user funnel. No conversion tracking. No retargeting pixels. No third-party scripts.
 
-## Error tracking
+## Client error tracking
 
-Platform-managed error reporter OR error-boundary discipline only (per `adr/observability-policy.md`). pm4ai bans `@sentry`, `@bugsnag`, `@honeybadger`, `rollbar`.
+Error-boundary discipline (per `adr/observability-policy.md`). pm4ai bans `@sentry`, `@bugsnag`, `@honeybadger`, `rollbar`.
 
 When enabled:
 - Source maps uploaded at build (private, not served to browser)
-- PII scrubbed at boundary
+- No identifiers attached; decoded state bodies scrubbed at the boundary before any report leaves the browser
 - Rate-limited to prevent spam
-- Connected to Plausible event for "error class X occurred at frequency Y"
+- Connected to a Plausible event for "error class X occurred"
 
 ## Real-user performance
 
-Web Vitals (LCP, INP, CLS, FCP, TTFB) reported via Route Handler `/api/rum` with no identifiers attached. Aggregated server-side, exposed via internal dashboard.
+Web Vitals (LCP, INP, CLS, FCP, TTFB) collected in the browser with no identifiers attached, reported as aggregate Plausible events. No request carries any per-user data.
 
 ## Internal dashboards
 
@@ -53,14 +47,9 @@ Self-host Grafana + Prometheus OR none. When enabled, exposed only on internal n
 
 Dashboards:
 - Page view + sim usage aggregate
-- Error rate per route
-- Convex mutation latency p50/p95/p99
-- Snapshot save volume (count, not content)
+- Client error rate per route
+- Web Vitals distribution (p50/p95/p99)
 - CDN cache-hit ratio at Cloudflare
-
-## Tracing
-
-Distributed tracing via OpenTelemetry, self-host Tempo / Jaeger. Request spans across Caddy → Next → Convex. Optional, disabled in floor.
 
 ## Banned
 
@@ -76,4 +65,4 @@ Distributed tracing via OpenTelemetry, self-host Tempo / Jaeger. Request spans a
 
 - `tools/lint/no-third-party-trackers.ts` greps for known tracker script URLs + SDK package names; zero hits
 - DNT-header smoke: requests with `DNT: 1` produce no Plausible event
-- Privacy budget: server logs scrub-test asserts no PII tokens slip through redactor
+- Privacy budget: scrub-test asserts no decoded-state or identifier tokens slip through the error redactor

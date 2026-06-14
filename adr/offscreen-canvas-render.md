@@ -15,7 +15,7 @@ Entire 3D rendering moves to a Web Worker via `OffscreenCanvas`. Main thread ret
 
 ```mermaid
 flowchart LR
-    Main[Main thread<br/>DOM input zustand Convex client RSC hydration] --> Postmessage[postMessage typed RPC wrapper]
+    Main[Main thread<br/>DOM input zustand RSC hydration] --> Postmessage[postMessage typed RPC wrapper]
     Postmessage --> Worker[Render Worker<br/>OffscreenCanvas R3F three drei TSL shaders]
     Worker --> GPU[GPU]
 ```
@@ -46,7 +46,7 @@ Pointer raycast for K-map cell picking happens on render worker via drei `Bvh`. 
 
 ## Limitations + workarounds
 
-- DOM-related drei helpers (`Html`, `Hud`) don't work in worker — replaced by `packages/hud` uikit-backed in-3D overlays (already locked)
+- DOM-related drei helpers (`Html`, `Hud`) don't work in worker — `packages/hud` uikit-backed in-3D overlays serve this role
 - Some Three.js features need polyfill in worker (loaders, etc.) — handled by R3F's worker setup
 - Stats / debug overlays (leva, r3f-perf) render via main-thread bridge
 

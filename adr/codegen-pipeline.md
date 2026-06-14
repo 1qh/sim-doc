@@ -13,11 +13,6 @@ flowchart LR
     ISAGen --> ISATS[apps/web/features/datapath/generated/isa.ts]
     ISAGen --> GoldenFixtures[tools/test/golden-traces/*.json]
 
-    ConvexSchema[apps/backend/convex/schema.ts] --> ConvexGen[bunx convex codegen]
-    ConvexGen --> ConvexAPI[apps/backend/convex/_generated/api.ts]
-    ConvexGen --> ConvexDataModel[apps/backend/convex/_generated/dataModel.ts]
-    ConvexGen --> ConvexServer[apps/backend/convex/_generated/server.ts]
-
     DesignTokensSrc[packages/design-tokens/src/*] --> DesignTokensGen[bun run gen.tokens]
     DesignTokensGen --> DesignTokensCSS[packages/design-tokens/dist/tokens.css]
     DesignTokensGen --> DesignTokensJSON[packages/design-tokens/dist/tokens.json]
@@ -36,7 +31,6 @@ flowchart LR
 make gen:
   bun run gen.datapath
   bun run gen.isa
-  bunx --filter=backend convex codegen --typecheck disable
   bun run gen.tokens
 ```
 

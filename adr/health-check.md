@@ -21,14 +21,13 @@ Dokploy uses this for container liveness. Restarts container if endpoint returns
 
 ## Readiness — `/api/readyz`
 
-Asserts dependencies reachable: Convex backend, file storage, any other operator zoo primitives.
+Asserts the app can serve: the process is up and the core client bundles are reachable from the origin.
 
 ```ts
 export async function GET() {
   const checks = {
-    convex: await pingConvex(),     // typed timeout via AbortSignal.timeout(2000)
-    storage: await pingStorage(),
-    db: await pingDb(),
+    appShell: await fetchOk('/'),            // typed timeout via AbortSignal.timeout(2000)
+    clientBundle: await fetchOk('/_next/static/chunks/main.js'),
   };
   const allOk = Object.values(checks).every(Boolean);
   return Response.json(checks, {
@@ -43,16 +42,15 @@ Dokploy uses this for routing decisions: traffic flows only when readyz is 200.
 ## Why two endpoints
 
 - **Liveness** restarts the process. Cheap, always-true unless process is wedged.
-- **Readiness** controls routing. Returns 503 during dep outage so load balancer routes around.
+- **Readiness** controls routing. Returns 503 when the app shell or client bundles fail to serve, so the load balancer routes around.
 
-Mixing them = wrong-class restart on dep outage (won't fix dep, kills serving capacity).
+Mixing them = wrong-class restart on a serving fault (won't fix it, kills serving capacity).
 
 ## Timeouts
 
 Per `book/HARD-RULES.md` "Every wait loop has a deadline":
-- Convex ping: 2 s
-- Storage ping: 2 s
-- DB ping: 2 s
+- App shell fetch: 2 s
+- Client bundle fetch: 2 s
 
 Endpoint overall budget: 3 s. If any check times out → that check `false` → 503.
 
@@ -64,4 +62,4 @@ Endpoint overall budget: 3 s. If any check times out → that check `false` → 
 
 - Dokploy probe configuration references these paths
 - Deploy smoke: both endpoints 200
-- Readiness regression: simulate Convex down → readyz returns 503, healthz still 200
+- Readiness regression: simulate client bundle 404 → readyz returns 503, healthz still 200

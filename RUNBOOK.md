@@ -29,7 +29,7 @@ Scaffolds `packages/<name>/` with `package.json`, `tsconfig.json`, `src/`, found
 ```bash
 # 1. Update simdocs/MIPS-ISA.md opcode + funct table
 # 2. cd ~/sim
-bun run gen.isa        # regenerates apps/web/features/datapath/generated/isa.ts
+bun run gen.isa        # regenerates apps/web/src/features/datapath/generated/isa.ts
 # 3. Add golden-trace fixture under tools/test/golden-traces/<mnemonic>.json
 bun test golden        # asserts new fixture matches executor output
 ```
@@ -41,56 +41,27 @@ bun test golden        # asserts new fixture matches executor output
 # Snapshot test auto-runs on commit
 ```
 
-### Rotate Google OAuth client secret
+### Rotate the Cloudflare API token
 
 ```bash
-# 1. Generate new secret in Google Cloud Console (founder UI click)
+# 1. Generate a new token in the Cloudflare dashboard (founder UI click)
 # 2. Update operator-local secrets root:
-$EDITOR <secrets-root>/google-oauth-client.env
-# 3. Push to Convex env:
-cd ~/sim/apps/backend
-bunx convex env set GOOGLE_CLIENT_SECRET "$(cat <secrets-root>/google-oauth-client.env)"
-# 4. Push to Next env:
+$EDITOR <secrets-root>/cloudflare-api-token.env
+# 3. Push to deploy env:
 make env.sync
-# 5. Smoke:
-bun scripts/smoke-auth.ts
+# 4. Smoke:
+make smoke.deploy
 ```
 
-### Restore Convex from backup
+### Add a share schema version (expand-contract)
 
 ```bash
-# Backup location per operator reference deploy pattern (path in agent memory): <secrets-root>/convex-backup/<timestamp>.tar.zst
-cd ~/sim/apps/backend
-bunx convex import --replace <secrets-root>/convex-backup/<timestamp>.tar.zst
-```
-
-### Add a snapshot schema version (expand-contract)
-
-```bash
-# 1. Add new optional field in apps/backend/convex/schema.ts
-# 2. Bump packages/sim-engine version handler
-# 3. Commit old-version fixture under tools/test/replay-fixtures/v<N>/
+# 1. Bump packages/sim-engine version handler (add new optional field)
+# 2. Commit old-version fixture under tools/test/replay-fixtures/v<N>/
 bun test replay        # asserts old fixtures still replay
 ```
 
 ## Emergency
-
-### Flag-then-purge an abusive shared snapshot
-
-```bash
-# 1. Flag in Convex
-cd ~/sim/apps/backend
-bunx convex run admin:flagAbuse '{"hash": "<hash>", "reason": "<reason>"}'
-
-# 2. Purge from Cloudflare cache
-curl -X POST "https://api.cloudflare.com/client/v4/zones/<zone-id>/purge_cache" \
-  -H "Authorization: Bearer $CF_API_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"files": ["https://<domain>/s/<hash>"]}'
-
-# 3. Verify
-curl -I "https://<domain>/s/<hash>"   # should return 410 Gone
-```
 
 ### Roll back a bad deploy
 
@@ -100,15 +71,15 @@ make rollback          # redeploys previous tagged image via dokploy
 make smoke.deploy      # verifies
 ```
 
-### Convex backend down
+### App container down
 
 ```bash
 # 1. Check dokploy logs:
-dokploy logs convex-backend
+dokploy logs sim
 # 2. Restart:
-dokploy restart convex-backend
-# 3. If data corruption suspected:
-make convex.restore.latest
+dokploy restart sim
+# 3. If the image is bad, roll back:
+make rollback
 ```
 
 ### Caddy / TLS issues
@@ -120,15 +91,6 @@ dokploy logs caddy
 dokploy exec caddy caddy reload
 # 3. Verify TLS:
 curl -vI https://<domain>
-```
-
-### Rate-limit triggered for a legitimate user
-
-```bash
-# Per-IP rate limit is in Convex action limits + Valkey sliding-window
-# Adjust threshold (avoid in floor; investigate first):
-cd ~/sim/apps/backend
-bunx convex env set RATE_LIMIT_SNAPSHOT_PER_HOUR <new-value>
 ```
 
 ### Bootstrap a fresh operator machine
@@ -155,20 +117,6 @@ make verify.fresh
 
 ```bash
 dokploy logs <service-name> --follow
-```
-
-### Check Convex deploy status
-
-```bash
-cd ~/sim/apps/backend
-bunx convex deploy --dry-run
-```
-
-### Inspect a stuck snapshot
-
-```bash
-cd ~/sim/apps/backend
-bunx convex run snapshots:inspect '{"hash": "<hash>"}'
 ```
 
 ### Check CDN cache hit ratio

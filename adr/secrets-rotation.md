@@ -8,14 +8,9 @@ Every long-lived secret rotates on a documented cadence. Rotation procedures scr
 
 | Secret | Cadence | Trigger | Procedure |
 |---|---|---|---|
-| Google OAuth client secret | Annual | Calendar reminder + incident | `RUNBOOK.md` "Rotate Google OAuth client secret" |
-| Convex deploy key | Quarterly | Calendar + incident | `bunx convex auth rotate-deploy-key` |
-| Convex instance admin key | Quarterly | Calendar + incident | Convex CLI rotate |
 | Cloudflare API token | Annual | Calendar + incident | Generate new token, update operator secrets root, deploy |
 | Error reporter DSN (when enabled, non-Sentry) | n/a | Public, embedded in client; rotates on project rotation only | Generate new project, update env, redeploy |
 | Plausible API key (when self-host) | Annual | Calendar + incident | Plausible admin UI rotate |
-| Bootstrap admin emails | n/a | When admin set changes | Update `BOOTSTRAP_ADMIN_EMAIL` env, redeploy |
-| JWT signing keys (if added) | Quarterly | Calendar + incident | Per JWT rotation runbook (drafted when JWT lands) |
 
 ## Rotation discipline
 
@@ -31,7 +26,7 @@ Triggered when a secret is suspected leaked:
 2. Push to staging + prod simultaneously (no expand-contract for compromise)
 3. Revoke old immediately
 4. Audit logs for usage of old between leak and revocation
-5. Postmortem captured in `GOTCHAS.md`
+5. Postmortem captured at the topic-owner doc
 
 ## Automation candidates (deferred)
 
@@ -41,5 +36,5 @@ Triggered when a secret is suspected leaked:
 
 - Calendar reminders (operator-side)
 - Audit log retained per `OBSERVABILITY.md` structured logs
-- Smoke after each rotation: signin works, mutation works, deploy works
+- Smoke after each rotation: deploy works, app loads
 - Secret-expiry-date warning in dashboard (when observability dashboard exists)

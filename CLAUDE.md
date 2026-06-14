@@ -22,11 +22,11 @@ Every Claude session that touches this project runs in this exact order before a
    - `STACK.md` — locked picks + pm4ai banned-deps conformance
    - `STACK.md` — locked picks
    - `API-CONVENTIONS.md`, `GLOSSARY.md`, `OBSERVABILITY.md`
-   - `AUTH.md`, `PERSISTENCE.md`, `DEPLOY.md`, `SECURITY.md`, `SCHEMAS.md`
+   - `DEPLOY.md`, `SECURITY.md`
    - `MIPS-DATAPATH.md`, `MIPS-ISA.md`, `KMAP.md`, `PIPELINE.md`, `CRITICAL-PATH.md`, `COMPARE.md`, `ASM-EDITOR.md`
    - `LEARN.md`, `OG-IMAGES.md`
    - `VERIFY.md`, `RUNBOOK.md`
-   - `GOTCHAS.md`, `OPEN-QUESTIONS.md`
+   - `OPEN-QUESTIONS.md`
 
 3. Every file under `adr/`.
 

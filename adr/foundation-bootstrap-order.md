@@ -10,7 +10,7 @@ flowchart TD
     P3[Phase 3 — Substrate engine — sim-engine] --> P4
     P4[Phase 4 — Substrate 3D — three-kit + hud] --> P5
     P5[Phase 5 — Substrate editor — editor wrapper] --> P6
-    P6[Phase 6 — Foundation app shell — apps/web routes + RSC + auth + Convex backend wiring] --> P7
+    P6[Phase 6 — Foundation app shell — apps/web routes + RSC] --> P7
     P7[Phase 7 — Foundation demos — one per substrate package] --> P8
     P8[Phase 8 — Product feature: datapath core — ISA decoder + machine state + executor] --> P9
     P9[Phase 9 — Product feature: datapath 3D scene] --> P10
@@ -19,9 +19,9 @@ flowchart TD
     P12[Phase 12 — Product feature: pipeline analyzer + diagram] --> P13
     P13[Phase 13 — Product feature: critical path overlay] --> P14
     P14[Phase 14 — Product feature: side-by-side compare] --> P15
-    P15[Phase 15 — Persistence + share permalinks] --> P16
+    P15[Phase 15 — Share: URL-fragment encode + decode] --> P16
     P16[Phase 16 — Learn MDX pages + interactive islands] --> P17
-    P17[Phase 17 — Deploy: dokploy + Cloudflare + Convex instance] --> P18
+    P17[Phase 17 — Deploy: static client app + Cloudflare] --> P18
     P18[Phase 18 — Polish ratchet: a11y, perf, golden-trace tests, mutation tests, verify.fresh]
 ```
 
@@ -33,7 +33,7 @@ Caught by: repo-layout-presence lint.
 
 ## Phase 1 — Tooling
 
-- `lintmax.config.ts` (biome + oxlint + eslint orchestration per the operator's reference Convex+auth project pattern in memory)
+- `lintmax.config.ts` (biome + oxlint + eslint orchestration per the operator's reference project pattern in memory)
 - `sherif` workspace consistency
 - `simple-git-hooks` wiring `pre-commit: sh up.sh && git add -u`
 - `up.sh` runs `bun run fix` (lintmax fix) — never piped through head/tail per memory feedback
@@ -52,7 +52,7 @@ Caught by: `bun test` green per package.
 
 ## Phase 3 — sim-engine
 
-Deterministic state machine + trace + scrub + snapshot codec (canonicalize + blake3 + zstd). Property-based tests for codec round-trip on every state shape.
+Deterministic state machine + trace + scrub + share codec (canonicalize + zstd). Property-based tests for codec round-trip on every state shape.
 
 Caught by: round-trip property test, golden-snapshot test.
 
@@ -70,9 +70,9 @@ Caught by: editor mounts + accepts text + emits parse markers.
 
 ## Phase 6 — Foundation app shell
 
-Next.js app skeleton: RSC layout, theme, fonts, Cloudflare-bearer-safe headers, Convex client wiring, `@convex-dev/auth` integration with Google provider, `apps/backend/convex` schema (users, userProfiles, snapshots), bootstrap-admin seeding.
+Next.js app skeleton: RSC layout, theme, fonts, Cloudflare-bearer-safe headers, client store wiring, route scaffold. No backend, no identity layer.
 
-Caught by: app boots, auth redirect works against self-host Convex, anon user can hit every public route.
+Caught by: app boots, every anonymous visitor can hit every route.
 
 ## Phase 7 — Foundation demos
 
@@ -122,11 +122,11 @@ Split-pane two scenes synchronized step, diff highlighting, synchronized camera.
 
 Caught by: Playwright snapshot of compare mode.
 
-## Phase 15 — Persistence + share permalink
+## Phase 15 — Share: URL-fragment encode + decode
 
-Server Action `saveSnapshot` → sim-engine codec → Convex mutation (tier-2) OR URL fragment (tier-1). RSC route `/s/[hash]` rehydrates. Anonymous-claim flow on signin.
+`sim-engine` codec encodes state into a URL fragment (tier `'fragment'`); states too large to fit are tier `'oversize'` and non-shareable by design. Route `/s/[hash]` rehydrates from the fragment client-side. Snapshots persist to the visitor's local browser list (`/me`).
 
-Caught by: round-trip share-load test.
+Caught by: round-trip share-load test + tier-threshold property test.
 
 ## Phase 16 — Learn MDX
 
@@ -136,7 +136,7 @@ Caught by: link-check + MDX-compile green.
 
 ## Phase 17 — Deploy
 
-Dokploy + Cloudflare DNS/CDN + Convex self-host instance pointed at via `CONVEX_SELF_HOSTED_URL`. Bootstrap script derived from the operator's reference deploy project pattern (path in agent memory).
+Static client app behind Caddy + Cloudflare DNS/CDN. Bootstrap script derived from the operator's reference deploy project pattern (path in agent memory).
 
 Caught by: `make verify.bearer` green + smoke against deployed URL.
 
@@ -154,4 +154,4 @@ Caught by: ledger gates all green at HEAD per `VERIFY.md`.
 
 ## Caught by overall
 
-Phase gate: each phase's caught-by must be green before the next phase starts. Phase-skip is a violation. Re-entrancy on a previously-green phase is allowed (ratchet up).
+Phase gate: each phase's caught-by must be green before the next phase starts. Phase-skip is a violation. Re-entrancy on an already-green phase is allowed (ratchet up).

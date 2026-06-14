@@ -135,11 +135,11 @@ const snapshotDecodeCache = new WeakMap<SnapshotKey, MachineState>();
 | `await scheduler.yield()` | Between work units in long-running compute (every 5ms) |
 | `requestIdleCallback` | Speculative pre-compute (next frames during scrub, etc.) |
 
-`setTimeout(fn, 0)` banned (no priority signal, deprecated for this use).
+`setTimeout(fn, 0)` banned (no priority signal, wrong tool for this use).
 
 ## No redirects
 
-Every internal route resolves directly. 301 / 302 / 307 / 308 banned for internal navigation. External link redirects (oauth flows) excepted.
+Every internal route resolves directly. 301 / 302 / 307 / 308 banned for internal navigation.
 
 Reason: each redirect costs a round-trip; on slow connections this is the largest avoidable latency.
 

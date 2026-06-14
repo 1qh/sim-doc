@@ -11,7 +11,7 @@ Screens narrower than ~1024px get a read-only experience. Full interactivity (as
 - Example library browseable
 - Read register / memory / signal values from a saved snapshot
 - Static image fallback for 3D islands (server-rendered at build time, cached at edge)
-- Auth flow works (signin from mobile to claim anon saves)
+- Share-by-URL works from mobile (open a shared link, view the sim state)
 - Onboarding tour readable
 
 ## What requires desktop

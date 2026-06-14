@@ -47,10 +47,10 @@ mindmap
       Trace log
     Syscalls
       Print int print string read int read string exit
-    Persistence
-      Save snapshot
-      Content addressed permalink
-      Anonymous claim on later signin
+    Share
+      Save snapshot to local browser list
+      Share whole state via URL fragment
+      Oversize states non-shareable by design
 ```
 
 ### Instruction set
@@ -106,10 +106,10 @@ mindmap
       Practice user groups
       Reveal solution toggle
       Step through QM table
-    Persistence
-      Save exercise
-      Permalink
-      Anonymous claim on later signin
+    Share
+      Save exercise to local browser list
+      Share whole state via URL fragment
+      Oversize states non-shareable by design
 ```
 
 ### Variable range
@@ -120,16 +120,17 @@ mindmap
 
 The MIPS datapath's Control unit and ALU Control are themselves Boolean functions. The K-map tool can ingest the truth table of any control signal as a function of `(opcode, funct)` and visualize its minimization. This link is the headline pedagogy of the product. See `KMAP.md` "Datapath cross-link".
 
-## Persistence
+## Share
 
-- Anonymous-first, all features available without signin
-- Save / share / permalink for every sim state, content-addressed
-- Optional signin claims anonymous saves
-- See `AUTH.md`, `PERSISTENCE.md`
+- Anonymous-only — every feature available, no accounts, no login
+- Save any sim state to the local in-browser snapshot list (`/me`)
+- Share any sim state by URL — the whole state rides in the URL fragment, decoded client-side
+- States too large for a URL fragment are non-shareable by design (tier `'oversize'`)
+- See `adr/share-content-addressed.md`
 
 ## Deploy
 
-- Dokploy VM + Cloudflare DNS + Convex self-host instance
+- Static client app behind Caddy + Cloudflare DNS/CDN
 - Local-first hostability invariant — same stack runs in compose on a MacBook
 - See `DEPLOY.md`
 

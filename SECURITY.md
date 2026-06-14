@@ -1,19 +1,21 @@
 # SECURITY
 
-Threat model + defense layers + operator-local secrets root.
+Threat model + defense layers for a pure-client web app. No accounts, no server-side persistence, no backend to compromise.
+
+## Surface
+
+The app is a static client. There is no login, no session, no user data store, and no server-write path. The real attack surface is the browser: XSS, content-security-policy gaps, dependency supply-chain, and untrusted share-fragment input that the client decodes locally.
 
 ## Threat model
 
 | Threat | Mitigation |
 |---|---|
-| Malicious snapshot content (XSS via shared URL) | Snapshot bodies are typed binary, deserialized via `sim-engine` codec; no `eval`, no HTML, no inline scripts. UI renders only typed fields. |
-| Abuse via shared permalinks (offensive Asm comments etc.) | `flagAbuse` mutation + admin review queue; flagged hashes return 410 + cache purge at CF |
-| OAuth account takeover | Standard `@auth/core` Google provider, redirect validation against allowed origins (mirrors operator's reference Convex+auth project pattern), no email aliases stripped |
-| CSRF | `@convex-dev/auth` provides cookie-based session; Convex mutations require auth token in body, not just cookie |
-| XSS in user-authored Asm / Boolean expr | Editor sanitizes via Monaco's typed model; rendering uses React, no `dangerouslySetInnerHTML` anywhere in product |
-| Rate-limit abuse (mass anonymous saves to fill storage) | Per-IP rate limit on `saveSnapshot` via Convex action limits + sliding-window counter |
-| Supply-chain (compromised npm dep) | Renovate auto-bumps with minimum-release-age gate (per `book/HARD-RULES.md` "Major dep bumps reviewed within one week"), CVE gate, manifest-diff gate |
-| Secrets leak | Single secrets root per `book/HARD-RULES.md` "Single secrets root", never committed, never in tracked docs |
+| Untrusted share fragment (state injected via URL hash) | Fragment is client-decoded untrusted input: base64url → `DecompressionStream("deflate-raw")` → bytes → `sim-engine` codec. Validated against Zod schemas on decode; malformed or schema-violating payloads are rejected, never executed. No `eval`, no HTML, no inline scripts. |
+| XSS via decoded state content | Decoded state is typed binary deserialized to typed fields; UI renders only typed fields through React/JSX. No `dangerouslySetInnerHTML` anywhere in product. |
+| XSS in user-authored Asm / Boolean expr | Editor uses Monaco's typed model; rendering uses React, no `dangerouslySetInnerHTML`. |
+| Oversize share payload | A state too large for a URL fragment is labeled tier `'oversize'` by the encoder and is not shareable. There is no server fallback, so no upload surface exists to attack. |
+| Supply-chain (compromised npm dep) | Renovate auto-bumps with minimum-release-age gate (per `book/HARD-RULES.md`), CVE gate, manifest-diff gate. |
+| Malicious script injection at runtime | Strict Content-Security-Policy: no inline scripts, no `eval`, locked script-src to self + the analytics origin. |
 
 ## Defense in depth (per `book/HARD-RULES.md`)
 
@@ -22,35 +24,18 @@ Every safeguard has at least two independent enforcement points:
 | Invariant | Layer 1 | Layer 2 |
 |---|---|---|
 | No raw HTML in user content | Editor's typed model rejects raw HTML at parse time | React rendering uses JSX only, no `dangerouslySetInnerHTML` |
-| Auth required for `/me` | Route segment auth check via `@convex-dev/auth` middleware | Convex `mySnapshots` query asserts identity, returns 401 if anon |
-| Abuse-flagged hash blocked | `loadSnapshot` returns 410 | Cache-Control header on flagged response sets max-age=0 + CF purge call |
-| Owner-only mutations | Convex `mySnapshots` filters by `ownerUserId` | Route handler asserts cookie-identity matches request identity |
+| Decoded share fragment is well-formed | Codec deserializer rejects bytes that fail the schema-version prefix check | Zod schema validation rejects any field violating the typed shape |
+| No script injection | CSP `script-src 'self'` blocks inline + remote scripts | `no-eval` lint asserts no `eval` / `Function(` constructors in source |
 
-## Single secrets root
+## Secrets
 
-Per `book/HARD-RULES.md`. Single tree owned by operator. Bootstrap script reads from there, populates alternate paths via symlink. Generated / regenerable secrets (Convex deploy keys, OAuth client secrets that rotate) live outside the root, regenerate from originals.
-
-Operator-local path lives in agent persistent memory, never in this doc.
-
-## Required env vars (validated by Zod at boundary)
-
-| Var | Used by |
-|---|---|
-| `CONVEX_SELF_HOSTED_URL` | Next + Convex client |
-| `CONVEX_DEPLOYMENT_URL` | Convex deployment target |
-| `CONVEX_DEPLOY_KEY` | Convex deploy CLI |
-| `SITE_URL` | Auth redirect validation (allowed origins) |
-| `GOOGLE_CLIENT_ID` | OAuth |
-| `GOOGLE_CLIENT_SECRET` | OAuth |
-| `BOOTSTRAP_ADMIN_EMAIL` | Admin role seeding |
-
-Zod v4 schema in `apps/web/server/env.ts` + `apps/backend/convex/env.ts`. Per `book/HARD-RULES.md` "Zero fallback" — missing required env = throw at boot, never silently default.
+No server secrets are needed for app operation — there is no backend, no auth provider, no deploy key. The only client-side configuration is the public analytics domain (a non-secret) injected at build.
 
 ## Logging + redaction
 
-- No PII in logs (no emails, no user ids in plaintext logs)
-- Auth tokens, OAuth secrets, Convex deploy keys never logged
-- Errors quoted exact in dev; redacted in prod (full stack to internal logs only)
+- No PII is collected, so none can be logged.
+- Client error reporting carries no identifiers and scrubs decoded state bodies before any report leaves the browser.
+- Errors quoted exact in dev; redacted to error-class only in prod.
 
 ## TLS
 
@@ -72,6 +57,5 @@ Triage:
 
 - `tools/lint/no-dangerously-set-inner-html.ts` greps for `dangerouslySetInnerHTML` anywhere
 - `tools/lint/no-eval.ts` greps for `eval`, `Function(` constructors
-- Zod boundary validation runs on every env read
-- Spec-of-code lint asserts every documented secret env appears in env schema
-- Rate-limit smoke test: rapid saveSnapshot hits get 429
+- CSP smoke: response carries a `script-src 'self'` policy; inline-script fixture is blocked
+- Share-decode fuzz: random + adversarial fragments decode to either a valid typed state or a clean rejection, never an execution path

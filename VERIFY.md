@@ -44,7 +44,6 @@ Every gate wrapped by ledger recorder (`make ledger` reports green-at-HEAD).
 | `spec.datapath` | `tools/lint/spec-of-code/datapath-diff.ts` | `MIPS-DATAPATH.md` tables match generated topology |
 | `spec.isa` | `tools/lint/spec-of-code/isa-diff.ts` | `MIPS-ISA.md` tables match generated ISA |
 | `spec.stack` | `tools/lint/spec-of-code/stack-presence.ts` | `STACK.md` picks consumed in source |
-| `spec.schemas` | `tools/lint/spec-of-code/convex-schema-diff.ts` | `SCHEMAS.md` matches `apps/backend/convex/schema.ts` |
 | `spec.lint-baseline` | `tools/lint/spec-of-code/lint-baseline-diff.ts` | `adr/lint-baseline.md` matches `lintmax.config.ts` |
 
 ### Unit tests
@@ -55,24 +54,17 @@ Every gate wrapped by ledger recorder (`make ledger` reports green-at-HEAD).
 | `test.property` | `bun test --property` | fast-check property tests pass |
 | `test.golden` | `bun test golden-trace` | Per-instruction golden traces match committed |
 | `test.codec-roundtrip` | `bun test codec` | Serialize → deserialize round-trip |
-| `test.codec-hash-stability` | `bun test codec.stability` | Hash unchanged for committed inputs |
+| `test.codec-stability` | `bun test codec.stability` | Encoded fragment unchanged for committed inputs |
 | `test.replay` | `bun test replay` | Old-schema-version fixtures replay green |
-| `test.crossmachine-hash` | CI Linux + CI macOS run same fixture | Identical hash |
-
-### Integration tests
-
-| Gate | Command | Asserts |
-|---|---|---|
-| `test.convex` | `convex-test` | Mutations + queries round-trip against in-mem Convex |
-| `test.auth-flow` | scripted | Anon → signin → claim flow green |
-| `test.rate-limit` | scripted | Rapid saveSnapshot returns 429 |
+| `test.crossmachine-bytes` | CI Linux + CI macOS run same fixture | Identical canonical bytes |
+| `test.share-tier` | `bun test share.tier` | States bordering the fragment budget split `'fragment'` / `'oversize'` |
 
 ### E2E tests
 
 | Gate | Command | Asserts |
 |---|---|---|
-| `test.e2e.anon` | Playwright | Anon session exercises every public route, no auth wall |
-| `test.e2e.share` | Playwright | Save → permalink → load → state hash matches |
+| `test.e2e.anon` | Playwright | Anonymous visitor exercises every route, full functionality |
+| `test.e2e.share` | Playwright | Encode → URL fragment → decode → state matches |
 | `test.e2e.compare` | Playwright | Compare mode renders + steps both panes |
 | `test.e2e.pipeline` | Playwright | Pipeline diagram + hazard + forwarding cells correct |
 | `test.e2e.kmap-2d` | Playwright | 2D K-map grouping produces expected SOP |
@@ -116,7 +108,7 @@ Every gate wrapped by ledger recorder (`make ledger` reports green-at-HEAD).
 | Gate | Command | Asserts |
 |---|---|---|
 | `verify.local` | `make verify.local` | Pure compose stack green, no internet |
-| `verify.bearer` | `make verify.bearer` | With CF + Convex self-host green |
+| `verify.bearer` | `make verify.bearer` | With Cloudflare CDN + DNS in front, green |
 | `verify.fresh` | `make verify.fresh` | Bootstrap from clean state |
 
 ### Deploy verification
@@ -165,7 +157,6 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [x] `tsc.sim-engine`
 - [x] `tsc.three-kit`
 - [x] `tsc.apps-web`
-- [x] `tsc.apps-backend`
 
 ### Codegen freshness
 
@@ -177,7 +168,6 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [x] `spec.datapath`
 - [x] `spec.isa`
 - [x] `spec.stack`
-- [x] `spec.schemas`
 - [x] `spec.lint-baseline`
 
 ### Unit tests
@@ -194,8 +184,9 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [x] `test.property.boolean`
 - [x] `test.property.sim-engine`
 - [x] `test.codec-roundtrip`
-- [x] `test.codec-hash-stability`
-- [x] `test.crossmachine-hash`
+- [x] `test.codec-stability`
+- [x] `test.crossmachine-bytes`
+- [x] `test.share-tier`
 
 ### Replay codec
 
@@ -225,12 +216,6 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [x] `test.golden.ori`
 - [x] `test.golden.sll`
 - [x] `test.golden.srl`
-
-### Integration
-
-- [x] `test.convex`
-- [x] `test.auth-flow`
-- [x] `test.rate-limit`
 
 ### E2E — anonymous routes
 
@@ -396,13 +381,10 @@ Every box flips `- [ ]` → `- [x]` only with literal evidence captured in the m
 - [x] `smoke.deploy.pipeline`
 - [x] `smoke.deploy.learn`
 - [x] `smoke.deploy.share`
-- [x] `smoke.share.dokploy`
 - [x] `smoke.share.cloudflare-tunnel`
 
 ### Infra
 
-- [x] `infra.convex.local`
-- [x] `infra.convex.dokploy`
 - [x] `infra.cloudflare.dns`
 - [x] `infra.cloudflare.tunnel`
 - [x] `infra.ci.actions-enabled`

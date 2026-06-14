@@ -7,14 +7,10 @@ Every error code that crosses a server boundary or surfaces to the user. Typed e
 | Code | HTTP | User message | Recovery |
 |---|---|---|---|
 | `BAD_INPUT` | 400 | "The input couldn't be processed. Check the highlighted field." | Show field-level errors, focus first invalid field |
-| `AUTH_REQUIRED` | 401 | "This action needs you to sign in." | Trigger signin flow, return to current view after |
-| `FORBIDDEN` | 403 | "You don't have permission for this action." | Surface in non-blocking toast, no recovery action |
 | `NOT_FOUND` | 404 | "We couldn't find that." | Suggest related items if applicable, otherwise return to home |
-| `GONE` | 410 | "This share is no longer available." | Suggest creating a new share from current state |
 | `RATE_LIMITED` | 429 | "Too many actions. Wait a moment." | Auto-retry after retry-after header |
-| `CONFLICT` | 409 | "Another change happened. Refresh to see the latest." | Surface refresh button |
 | `INTERNAL` | 500 | "Something went wrong on our side." | Log + platform error reporter (when enabled), offer retry |
-| `SERVICE_UNAVAILABLE` | 503 | "The server is temporarily unavailable." | Auto-retry with exponential backoff up to 3 times |
+| `SERVICE_UNAVAILABLE` | 503 | "The compute service is temporarily unavailable." | Auto-retry with exponential backoff up to 3 times |
 
 ## Client-side error codes
 
@@ -24,7 +20,6 @@ Every error code that crosses a server boundary or surfaces to the user. Typed e
 | `CLIENT_INVALID_KMAP` | K-map input | Inline error on truth table field | Highlight invalid cell, prevent solver run |
 | `CLIENT_SIM_DIVERGED` | Datapath / pipeline | Toast "Sim state hash mismatch — reload to recover" | Reload page button in toast |
 | `CLIENT_DECODE_FAILED` | Permalink load | Toast "Couldn't decode this permalink" + link to docs | Offer "report broken link" via security disclosure |
-| `CLIENT_OFFLINE_QUEUE_FULL` | Offline save | Toast "Offline queue full. Connect to sync." | Show connection state indicator |
 | `CLIENT_WEBGPU_UNAVAILABLE` | 3D scene init | Silent fallback to WebGL, no user-visible error | Continue with WebGL renderer |
 | `CLIENT_3D_CONTEXT_LOST` | 3D scene mid-runtime | Toast "3D context lost. Reloading scene." | Auto-reload scene state |
 
@@ -44,13 +39,13 @@ Every error code that crosses a server boundary or surfaces to the user. Typed e
 | `KMAP_BOOLEAN_EXPR_PARSE` | Boolean expression syntax error | "Couldn't parse Boolean expression" |
 | `SIM_DETERMINISM_LEAK` | Internal — frame-N hash mismatch | Throw, log, report to platform error reporter; user sees `CLIENT_SIM_DIVERGED` toast |
 | `CODEC_VERSION_UNSUPPORTED` | Snapshot has unknown schema version | Throw, log; user sees `CLIENT_DECODE_FAILED` toast |
-| `CODEC_INTEGRITY_FAIL` | Hash mismatch on snapshot body | Throw, log; user sees `GONE` (treat as compromised) |
+| `CODEC_INTEGRITY_FAIL` | Decode integrity check fails on a share fragment | Throw, log; user sees `CLIENT_DECODE_FAILED` toast |
 
 ## Error display rules
 
 - Errors quoted exact in development; redacted in production
 - No PII in error messages
-- Errors never include OAuth tokens, secrets, internal paths
+- Errors never include secrets or internal paths
 - Stack traces logged server-side, never sent to client
 - User messages domain language, no jargon, no technical noise
 - Recovery action always provided where one exists
@@ -63,8 +58,8 @@ Every error logged with structured fields (per `OBSERVABILITY.md`):
 {
   "level": "error",
   "errCode": "BAD_INPUT",
-  "op": "saveSnapshot",
-  "fields": ["contentType"],
+  "op": "assembleProgram",
+  "fields": ["source"],
   "duration_ms": 12
 }
 ```

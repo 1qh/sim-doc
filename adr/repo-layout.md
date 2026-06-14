@@ -7,8 +7,7 @@ Two repos: `sim` (code, monorepo) + `simdocs` (this docs corpus, flat).
 ```
 sim/
 ├── apps/
-│   ├── web/                  # Next.js product app
-│   └── backend/              # Convex schema + functions (self-host instance)
+│   └── web/                  # Next.js product app (pure client, no backend)
 ├── packages/
 │   ├── three-kit/
 │   ├── hud/

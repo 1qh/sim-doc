@@ -129,6 +129,16 @@ WebGPU + WebXR is NOT supported in 2026 (three.js #28968, #30806). On `navigator
 
 Substrate `Renderer.create({ xrRequested })` returns `WebGLRenderer` when XR session is requested. App must decide at mount, not at session-enter.
 
+## Pitfall
+
+- `postprocessing` v6 is WebGL2-only — per-renderer post chains: `WebGPURenderer` uses three's native TSL `PostProcessing` pipeline, `WebGLRenderer` uses `postprocessing` v6; substrate dispatches.
+- drei `MeshTransmissionMaterial` under WebGPU has render-target/depth/refraction edge cases — keep `MeshPhysicalMaterial` with `transmission: 1` as plan-B fallback; adaptive quality drops to it on low-tier devices.
+- Three.js r170+ needs explicit `texture.colorSpace = SRGBColorSpace` on custom material paths — set it in `packages/three-kit` material factories.
+- TSL color-space handling on external texture loads is inconsistent (three.js #30467) — use pure-procedural materials per `adr/asset-authoring.md`, no external textures.
+- drei `<Instances>` is slower than raw `InstancedMesh` above ~128 nodes (per-`<Instance>` reconciler overhead) — use raw `<instancedMesh>` + `setMatrixAt` + `instanceColor` for high-count and K-map dynamic recoloring; `<Instances>` only below ~128 nodes.
+- `THREE.LOD` thrashes at level boundaries with jittery cameras (no deadband) — hand-roll `useFrame` LOD with a 10% deadband around each threshold.
+- R3F v9 + React 19 StrictMode double-mounts side-effects across nested renderers — keep every `useEffect` touching `gl.domElement` or non-disposable globals idempotent in cleanup.
+
 ## Caught by
 
 - `tools/lint/stack-presence.ts` greps `packages/three-kit/package.json` for each named dep + at least one consumer site in src

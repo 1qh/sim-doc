@@ -18,7 +18,6 @@ Server-side, scripts, and tools rely on official Bun APIs as much as possible. P
 | Archive | `Bun.Archive` (tar) — n/a unless we archive |
 | Cookies | `Bun.Cookie` / `Bun.CookieMap` |
 | Crypto hash (md5/sha1/sha256/sha512) | `Bun.CryptoHasher` / `Bun.SHA256` / `Bun.SHA512` etc. |
-| Crypto hash (blake3) | `@noble/hashes/blake3` (Bun.CryptoHasher does not support blake3) |
 | Fast non-crypto hash | `Bun.hash(data)` (wyhash) |
 | HTML escape | `Bun.escapeHTML` |
 | UUIDs | `crypto.randomUUID()` (native) or `Bun.randomUUIDv7()` for time-ordered |
@@ -40,7 +39,6 @@ Server-side, scripts, and tools rely on official Bun APIs as much as possible. P
 | Nanosecond timing | `Bun.nanoseconds()` |
 | Plugin loader | `Bun.plugin({ name, setup })` |
 | FFI | `Bun.FFI` — n/a |
-| SQLite | `bun:sqlite` — n/a (Convex) |
 | Test runner | `bun:test` — for everything testable |
 
 ## What Bun does NOT cover for this project
@@ -49,7 +47,6 @@ These stay on dedicated libs:
 
 | Concern | Library |
 |---|---|
-| blake3 hash | `@noble/hashes/blake3` |
 | Boolean expression parsing | `chevrotain` |
 | Fuzzy search | `mini-search` |
 | Snapshot canonicalize | `safe-stable-stringify` |
@@ -69,8 +66,6 @@ These stay on dedicated libs:
 | Themes | `next-themes` |
 | Logging | `consola` |
 | Utilities | `es-toolkit` |
-| Auth | `@convex-dev/auth` + `@auth/core/providers/google` |
-| Persistence | `convex` |
 
 ## Banned
 
@@ -86,7 +81,7 @@ These stay on dedicated libs:
 - `glob` / `fast-glob` / `tinyglobby` — use `Bun.Glob`
 - `js-yaml` / `yaml` — use `Bun.YAML`
 - `@iarna/toml` — use `Bun.TOML`
-- `js-sha256` / `md5` / `crypto-js` — use `Bun.CryptoHasher` (or `@noble/hashes` for blake3)
+- `js-sha256` / `md5` / `crypto-js` — use `Bun.CryptoHasher`
 
 ## Client-side caveat
 
@@ -102,8 +97,6 @@ Bun.* APIs are server/script-only. Client code uses native Web APIs:
 Substrate packages target both runtimes — pure-TS code that runs on Bun or browser interchangeably (no Bun.* imports in `packages/*` source).
 
 Product app code in `apps/web` server (RSC + Server Actions + Route Handlers) uses Bun.*; client islands use Web APIs.
-
-Convex backend code (`apps/backend/convex/*`) runs in Convex runtime which is V8-based but not Bun; uses Web APIs + Convex helpers, not Bun.*.
 
 ## Caught by
 

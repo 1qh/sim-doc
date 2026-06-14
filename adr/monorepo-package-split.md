@@ -2,19 +2,18 @@
 
 ## Decision
 
-Seven substrate packages, two app workspaces.
+Seven substrate packages, one app workspace.
 
 | Path | Role |
 |---|---|
 | `packages/three-kit` | R3F + drei + TSL helpers, material library, signal-pulse shader, camera grammar, postprocessing presets |
 | `packages/hud` | In-3D UI chrome via drei-uikit |
 | `packages/design-tokens` | Palette, typography, spacing, motion easing — pure TS, no deps |
-| `packages/sim-engine` | Deterministic state machine, trace, scrub, snapshot codec (canonicalize + blake3 + zstd) |
+| `packages/sim-engine` | Deterministic state machine, trace, scrub, share codec (canonicalize + zstd) |
 | `packages/editor` | Monaco wrapper, language definitions, error markers |
 | `packages/bits` | Two's complement, sign-extend, base conversions, bit slicing |
 | `packages/boolean` | Truth table, QM, Petrick, Espresso, prime implicants, hazard analysis |
 | `apps/web` | Next.js product app — features (datapath, kmap, pipeline, critical-path, compare, learn) |
-| `apps/backend` | Convex schema + functions |
 
 ## Why this split, not finer or coarser
 

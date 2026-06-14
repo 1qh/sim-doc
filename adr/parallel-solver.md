@@ -50,7 +50,7 @@ Solve request cancellable via `AbortSignal`. Cancel propagates to all workers vi
 
 ## Result caching
 
-Coordinator emits result hash (blake3 of truth-table + don't-cares input). Server-side `'use cache'` keys results by this hash. Re-solve with same input = cache hit, zero work.
+Coordinator keys results by the canonical serialization of the truth-table + don't-cares input (the `canonicalize` output — stable key order, no extra hashing pass). Client-side cache keys results by this canonical key. Re-solve with same input = cache hit, zero work.
 
 `SharedWorker`-routed cross-tab: solver workers spawned by SharedWorker, cache hit serves any tab.
 

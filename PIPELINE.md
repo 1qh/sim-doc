@@ -88,7 +88,7 @@ Saved pipeline state includes:
 - Stall-insertion toggle state
 - Current scrub cycle position
 
-Shareable via tier-1 or tier-2 per `adr/share-content-addressed.md`.
+Shareable via URL fragment per `adr/share-content-addressed.md`.
 
 ## Caught by
 

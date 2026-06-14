@@ -1,7 +1,7 @@
 # LICENSE-INVENTORY
 
 Substrate packages: MIT.
-Product app + Convex schema + tools: proprietary (no LICENSE file shipped).
+Product app + tools: proprietary (no LICENSE file shipped).
 
 This doc inventories third-party deps + their licenses + the attribution surface.
 
@@ -72,7 +72,7 @@ Generated file committed; CI diffs on every push.
 
 ## Product app licenses
 
-Product app (`apps/web`, `apps/backend`, `tools/`) is proprietary. Third-party deps in product can be any license compatible with internal proprietary use (most permissive + copyleft). Inventory still generated for audit.
+Product app (`apps/web`, `tools/`) is proprietary. Third-party deps in product can be any license compatible with internal proprietary use (most permissive + copyleft). Inventory still generated for audit.
 
 ## Attribution surface
 

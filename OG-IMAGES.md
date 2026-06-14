@@ -62,7 +62,7 @@ Layout:
 - `Cache-Control: public, immutable, max-age=31536000, s-maxage=31536000`
 - Cloudflare edge caches forever per content-addressed identity
 - Cache key = full URL including hash
-- Purge on `flagAbuse` (per `RUNBOOK.md`)
+- Immutable per content-addressed identity — no purge needed
 
 ## Determinism
 

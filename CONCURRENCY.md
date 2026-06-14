@@ -20,7 +20,7 @@ Main thread is pure input dispatcher + zustand UI state. All compute + render of
 
 ```mermaid
 flowchart LR
-    Main[Main thread<br/>input dispatch zustand UI Convex client] -->|action| SimWorker[Sim worker<br/>state machine executor codec]
+    Main[Main thread<br/>input dispatch zustand UI] -->|action| SimWorker[Sim worker<br/>state machine executor codec]
     SimWorker -->|state diff via MessageChannel| RenderWorker[Render worker<br/>OffscreenCanvas R3F]
     RenderWorker --> GPU[GPU]
     SimWorker -->|telemetry batch| Main
@@ -31,7 +31,7 @@ Sim worker maintains `MachineState` (registers, memory, PC). Receives action (`s
 
 Render worker maintains scene graph. Receives state diff; updates mesh positions, materials, emissive intensities; renders frame. Sends pointer-hit results back to Main.
 
-Main thread receives input, dispatches to Sim/Render via thin typed-RPC wrapper. Updates zustand for UI chrome. Handles Convex subscriptions.
+Main thread receives input, dispatches to Sim/Render via thin typed-RPC wrapper. Updates zustand for UI chrome.
 
 ## Worker-to-worker MessageChannel
 
@@ -72,11 +72,11 @@ For shorter programs, single-worker pipeline analyzer handles end-to-end.
 
 ## Parallel snapshot decode (`/me` page)
 
-Bulk load of N saved snapshots:
+Bulk decode of N localStorage snapshot blobs:
 
 ```ts
 const decodedStates = await Promise.all(
-  snapshotHashes.map((hash) => decodeWorkerPool.acquire().decode(hash)),
+  snapshotBlobs.map((blob) => decodeWorkerPool.acquire().decode(blob)),
 );
 ```
 
@@ -160,7 +160,7 @@ For static datapath scene (which is most frames), culling result cached + invali
 
 ## Streaming response chunked-parallel processing
 
-For snapshot loads beyond URL-fragment tier, response body streamed:
+For large static assets fetched over the network (build-time example corpora, prefetched fixtures), response body streamed:
 
 ```ts
 const reader = response.body.getReader();
@@ -168,14 +168,14 @@ const chunks: Uint8Array[] = [];
 while (true) {
   const { done, value } = await reader.read();
   if (done) break;
-  // dispatch chunk to worker for incremental zstd-decode + hash-update
+  // dispatch chunk to worker for incremental zstd-decode
   workerPool.dispatch({ kind: 'decode-chunk', value });
   chunks.push(value);
 }
 const state = await workerPool.finalize();
 ```
 
-Decode + hash overlap with network read; wall-clock = network latency + minimal compute.
+Decode overlaps with network read; wall-clock = network latency + minimal compute.
 
 ## Worker lifecycle policy
 
@@ -274,25 +274,6 @@ flowchart LR
 
 CPU cost is ~2× single scene, but parallel — wall-clock matches single scene on multi-core devices.
 
-## Parallel Convex query discipline
-
-Independent queries always parallel:
-
-```ts
-// good
-const [snapshots, profile, examples] = await Promise.all([
-  convex.query(api.snapshots.mySnapshots),
-  convex.query(api.users.profile),
-  convex.query(api.examples.list),
-]);
-
-// banned — sequential await for independent reads
-const snapshots = await convex.query(api.snapshots.mySnapshots);  // 🚫
-const profile = await convex.query(api.users.profile);
-```
-
-Lint asserts: multiple `await convex.query(...)` in the same function body without intermediate dependency = violation; replace with `Promise.all`.
-
 ## Concurrent Server Actions
 
 Same pattern for client-initiated Server Action chains where actions don't depend on each other:
@@ -319,28 +300,12 @@ React 19 supports priority-shaped hydration. Visible content hydrates first:
 
 Hydration priority signaled via Suspense boundary placement + `<link rel="modulepreload" fetchpriority="high">` on critical bundles.
 
-## Streaming hash for large snapshots
-
-`blake3` supports incremental hashing — chunks fed as stream arrives. For snapshot bodies > 64 KB:
-
-```ts
-const hasher = blake3.create();
-for await (const chunk of stream) {
-  hasher.update(chunk);
-  // chunk also feeds incremental zstd decompress in parallel
-}
-const hash = hasher.digest();
-```
-
-Hash compute overlaps with stream arrival; net wall-clock = stream latency only.
-
 ## Cross-tab coordination
 
 | Mechanism | Use |
 |---|---|
-| `BroadcastChannel('sim')` | Signin event propagates to all tabs; save event propagates so other tabs invalidate their localStorage anon-hash list |
-| `SharedWorker` (where supported) | Single QM solver result shared across tabs (cache hit even if tab A solved, tab B requests same hash) |
-| `navigator.locks.request('save', ...)` | Web Locks API — prevent two tabs from simultaneously saving identical state (content-addressed dedups anyway, but lock saves the redundant write) |
+| `BroadcastChannel('sim')` | Local snapshot save propagates to all tabs so each refreshes its localStorage snapshot list |
+| `SharedWorker` (where supported) | Single QM solver result shared across tabs (cache hit even if tab A solved, tab B requests same input) |
 | `localStorage` event | Fallback for browsers without BroadcastChannel (mostly redundant; covered by BroadcastChannel polyfill) |
 
 ## GPU / CPU pipelining
@@ -376,7 +341,7 @@ Turbo's `tasks` should show maximum parallelism for `bun run build` on a multi-c
 - Bun test: parallel by default, per-file isolation
 - Per-package tests run in parallel via Turbo
 - E2E (Playwright): parallel workers, shared browser instance with isolated contexts
-- Convex integration tests: per-test isolated Convex in-memory backend
+- Worker integration tests: per-test isolated worker instances
 
 ## CI parallelism (post velocity-mode exit)
 
@@ -394,7 +359,7 @@ Total wall-clock = slowest single job, not sum.
 
 `requestIdleCallback` fires for non-critical compute. Patterns:
 - Pre-compute next N frames during scrub direction (per `PERFORMANCE.md` predictive input)
-- Pre-warm next-likely route's data via Convex queries while user reads current
+- Pre-warm next-likely route's static + computed data while user reads current
 - Pre-index search corpus updates after content change
 - Pre-validate next likely user input (e.g., next instruction in a curriculum sequence)
 
@@ -408,13 +373,12 @@ Idle work cancellable via `AbortSignal` if user navigation / interaction superse
 
 ## Concurrent file I/O on server
 
-Server Actions + Route Handlers always `Promise.all` for independent fs / Convex / network ops.
+Server Actions + Route Handlers always `Promise.all` for independent fs / network ops.
 
 ## Deferred-with-trigger ratchets
 
 | Ratchet | Trigger |
 |---|---|
-| Workerized Convex client (subscriptions in dedicated worker) | Main-thread cost of Convex subscription dispatch measurably exceeds 1ms p95 |
 | SharedArrayBuffer + Atomics for lock-free cross-worker state | COOP/COEP commitment per `adr/compute-budgets.md` SAB trigger |
 | WebGPU compute shaders for QM/Espresso solver | Solver workload exceeds CPU-worker partition budget |
 | Multi-region anycast for read latency | Single-region origin hits user-latency ceiling |
@@ -427,7 +391,6 @@ Server Actions + Route Handlers always `Promise.all` for independent fs / Convex
 - Forgetting to pass `AbortSignal` to async ops in idle callbacks
 - Cross-tab state drift (BroadcastChannel + localStorage event)
 - `setTimeout` for delay between work units (use `scheduler.yield()` + priority)
-- Saving without `navigator.locks.request` when concurrent tabs likely
 - Spurious `dependsOn` in turbo config serializing parallel work
 - Sim state machine on main thread (must run in Sim worker)
 - Inter-worker messages relayed through main thread (use MessageChannel direct port)
@@ -436,6 +399,13 @@ Server Actions + Route Handlers always `Promise.all` for independent fs / Convex
 - Bulk snapshot decode sequentially (parallelize via worker pool)
 - localStorage for solver result cache > 5MB (use OPFS)
 - Single command encoder on WebGPU when scene composes multiple independent passes (use parallel encoders)
+
+## Pitfall
+
+- WebGPU `device.queue` is singular — no user-facing multi-queue API (spec #1065 open); encode compute + render passes in one `commandEncoder` and submit once, letting the GPU overlap them via dependency tracking.
+- `AbortSignal` is not structured-cloneable across workers (WHATWG dom #948 open) — send `{ kind: 'abort', id }` and have the worker hold a `Map<id, AbortController>`; for sync CPU loops poll a generation counter.
+- `scheduler.postTask` priorities are absent in Safari (18.4 ships `yield` only) — feature-detect with a MessageChannel-microtask fallback chain.
+- `drei/Html`, `drei/View`, `drei/Hud` require real DOM and don't run inside an OffscreenCanvas worker — render K-map UI as DOM/SVG above the transparent worker canvas; keep only the MIPS datapath R3F-in-worker.
 
 ## Caught by
 

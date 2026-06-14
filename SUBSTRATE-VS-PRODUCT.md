@@ -6,7 +6,7 @@ Per `book/SUBSTRATE.md` mindset. Product is the smallest delta on a published su
 
 ```mermaid
 flowchart LR
-    Substrate[Substrate — open OSS<br/>3D engine, sim engine, snapshot codec,<br/>Boolean algebra, bit utilities, design tokens,<br/>in-3D HUD, editor, generic auth + persistence wrappers] --> Product
+    Substrate[Substrate — open OSS<br/>3D engine, sim engine, share codec,<br/>Boolean algebra, bit utilities, design tokens,<br/>in-3D HUD, editor] --> Product
     Product[Product — private delta<br/>MIPS datapath topology, MIPS ISA semantics,<br/>K-map geometry, pipeline analyzer, comparison view] --> User
     Product -. consumes never modifies .-> Substrate
 ```
@@ -18,7 +18,7 @@ flowchart LR
 | `three-kit` | R3F + drei + TSL helpers, signal-pulse shader, material library (PCB, brushed metal, glass, emissive trace), camera grammar, postprocessing presets, contact shadows, instancing helpers |
 | `hud` | In-3D UI chrome (uikit panels, telemetry readouts, breadcrumb, command palette in 3D) |
 | `design-tokens` | Palette, type, spacing, motion easing curves, animation duration tokens |
-| `sim-engine` | Deterministic state machine pattern, trace, scrub, breakpoint, snapshot codec (canonicalize, blake3, serialize, deserialize, schema versioning) |
+| `sim-engine` | Deterministic state machine pattern, trace, scrub, breakpoint, share codec (canonicalize, serialize, deserialize, schema versioning) |
 | `editor` | Monaco wrapper, custom language wiring, error markers, theme integration |
 | `bits` | Two's complement, sign-extend, binary/hex/decimal conversions, bit slicing, byte ordering |
 | `boolean` | Truth table, minterm/maxterm list, Quine-McCluskey, Petrick selection, Espresso heuristic, prime implicants, essential PIs, minimal SOP, minimal POS, hazard analysis |

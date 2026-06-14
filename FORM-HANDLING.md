@@ -23,8 +23,8 @@ export async function saveKmapAction(_prev: ActionState, formData: FormData) {
     groupings: JSON.parse(formData.get('groupings') as string),
   });
   if (!parsed.success) return { ok: false, errCode: 'BAD_INPUT', fieldErrors: parsed.error.flatten() };
-  // ... canonicalize + hash + Convex mutation
-  return { ok: true, hash: '...' };
+  // ... canonicalize + encode to URL fragment
+  return { ok: true, fragment: '...' };
 }
 ```
 
@@ -44,7 +44,7 @@ export function SaveButton({ kmap }) {
       <input type="hidden" name="groupings" value={JSON.stringify(kmap.groupings)} />
       <Submit />
       {state?.ok === false && <ErrorBanner code={state.errCode} fieldErrors={state.fieldErrors} />}
-      {state?.ok === true && <ShareLink hash={state.hash} />}
+      {state?.ok === true && <ShareLink fragment={state.fragment} />}
     </form>
   );
 }
@@ -123,7 +123,7 @@ With JavaScript:
 
 - Client-only forms that don't degrade gracefully
 - `onSubmit` handlers that bypass Server Actions
-- Mutating server state via Convex client mutation when a Server Action exists (use the Server Action — gives progressive enhancement, error envelope, typed state)
+- Ad-hoc client fetch for compute when a Server Action exists (use the Server Action — gives progressive enhancement, error envelope, typed state)
 - Hidden validation gaps (always validate server-side, never trust client-only)
 - `e.preventDefault()` patterns (use `useActionState`)
 - Bare `<button type="submit">` without `<Submit>` wrapper that handles pending state

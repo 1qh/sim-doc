@@ -24,6 +24,10 @@ Pure-procedural. Every visual is authored in code via R3F primitives + TSL shade
 - External CDN-loaded model URLs.
 - Blender → glTF pipeline tooling.
 
+## Pitfall
+
+- drei `Environment preset="city"` fetches HDRI from a CDN at runtime (lazy-loaded, not production-safe) — use a drei-bundled preset (`'studio'` for industrial) or self-host higher-res HDRI lazy-loaded after first paint.
+
 ## Caught by
 
 - Repo-asset lint scans for any of the banned extensions under any path; zero hits required.

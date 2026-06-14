@@ -11,24 +11,24 @@ Concrete shapes:
 - Exploring how a 5-variable K-map's wraparound actually works (the headline 3D win)
 - Deriving the Control unit truth table and seeing it minimized in K-map, then watching the same signals fire in the datapath
 
-## Anonymous-first
+## Anonymous-only
 
-Default state. Every feature works without identity:
+Every visitor is anonymous; there are no accounts. Every feature works with no identity:
 - Pick instruction, step, run, reset
 - Author truth table, group cells, see PIs
-- Save snapshot → content-addressed permalink works
-- Share permalink → recipient opens, sees exact same sim state, no signup wall
-- Side-by-side compare, pipeline view, critical path — all anon
+- Save a snapshot to the local in-browser list
+- Share via URL → recipient opens the link, sees the exact same sim state, no wall
+- Side-by-side compare, pipeline view, critical path — all anonymous
 
-## Signed-in
+## Local snapshots + sharing
 
-Optional accent for cross-device persistence:
-- "My saves" list across devices
-- Anonymous snapshots saved in localStorage get claimed silently on signin
-- No feature is locked behind signin
+- Snapshots live in the visitor's own browser (localStorage), surfaced as the `/me` local list
+- Sharing carries the whole state in the URL fragment; the recipient decodes it client-side
+- States too large for a URL fragment are non-shareable by design (tier `'oversize'`)
 
 ## Not addressed
 
+- Accounts / login / cross-device persistence
 - Real-time multiplayer collaboration
 - Classroom / instructor dashboards / grading
 - Curriculum-shaped lesson sequencing

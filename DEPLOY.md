@@ -1,6 +1,6 @@
 # DEPLOY
 
-Dokploy VM (operator's existing infra) + Cloudflare DNS/CDN bearer + Convex self-host instance.
+Dokploy VM (operator's existing infra) + Cloudflare DNS/CDN bearer. The app is a static/standalone Next client served behind Caddy — no backend services.
 
 Decision + rationale: see `adr/deploy-target.md`.
 
@@ -10,33 +10,22 @@ Decision + rationale: see `adr/deploy-target.md`.
 flowchart LR
     User[Browser] --> CF[Cloudflare DNS plus CDN bearer]
     CF --> Caddy[Caddy reverse proxy on Dokploy VM]
-    Caddy --> Next[Next app container]
-    Caddy --> Convex[Convex self host container]
-    Next --> Convex
+    Caddy --> Next[Next client app container]
 ```
+
+The browser does all the work: simulation, snapshot save to localStorage, and share encode/decode in the URL fragment. The origin only serves the static client.
 
 ## Compose locally
 
-`compose.yaml` at repo root brings up the full operator zoo:
+`compose.yaml` at repo root brings up the client behind Caddy:
 
 ```yaml
 services:
   next-app:
     build: ./apps/web
     environment:
-      - CONVEX_SELF_HOSTED_URL
       - SITE_URL
-      - GOOGLE_CLIENT_ID
-      - GOOGLE_CLIENT_SECRET
-    depends_on:
-      - convex-backend
-  convex-backend:
-    image: ghcr.io/get-convex/convex-backend:latest
-    environment:
-      - INSTANCE_NAME
-      - INSTANCE_SECRET
-    volumes:
-      - convex-data:/data
+      - PLAUSIBLE_DOMAIN
   caddy:
     image: caddy:latest
     volumes:
@@ -46,11 +35,10 @@ services:
       - "80:80"
       - "443:443"
 volumes:
-  convex-data:
   caddy-data:
 ```
 
-Exact env shape derived from the operator's reference deploy project (path in agent memory) — read at bootstrap time.
+`SITE_URL` and `PLAUSIBLE_DOMAIN` are public, non-secret build inputs.
 
 ## Deploy to Dokploy
 
@@ -58,7 +46,7 @@ Exact env shape derived from the operator's reference deploy project (path in ag
 make deploy
 ```
 
-Equivalent to: build container images → push to registry → dokploy applies compose update → smoke check against deployed URL.
+Equivalent to: build container image → push to registry → dokploy applies compose update → smoke check against deployed URL.
 
 Concrete dokploy CLI invocation matches the operator's reference deploy project pattern (path in agent memory); project ID + dokploy server URL live in operator-local secrets.
 
@@ -67,30 +55,30 @@ Concrete dokploy CLI invocation matches the operator's reference deploy project 
 Cloudflare:
 - A / AAAA records → Dokploy VM IP
 - Proxied (orange cloud) → CDN cache active
-- Page Rules: `*/s/*` cache-everything, immutable, edge-TTL 1y
+- Page Rules: static asset paths cache-everything, immutable, edge-TTL 1y
 - Always Use HTTPS on
 - HSTS on
 - No Workers, no KV, no D1, no Pages Functions, no R2 Worker bindings (per `adr/deploy-target.md` bearer-mode rules)
 
 ## Service worker + PWA
 
-Per `adr/offline-pwa.md`. Next-pwa or Workbox registers a service worker at first visit. Caches app shell + assets + visited permalinks. Service worker version-tagged at build; new build deploys → subtle update-available toast on next visit.
+Per `adr/offline-pwa.md`. Next-pwa or Workbox registers a service worker at first visit. Caches app shell + assets. Because all state lives client-side and shares are URL-fragment-only, a visited share link works fully offline once the shell is cached. Service worker version-tagged at build; new build deploys → subtle update-available toast on next visit.
 
 ## Verifier targets
 
 | Target | Asserts |
 |---|---|
-| `make verify.local` | Compose stack green, no internet access, full functionality |
+| `make verify.local` | Compose stack green, no internet access, full functionality (sim, save, share round-trip all client-side) |
 | `make verify.bearer` | With CF in front of VM, identical responses + cache headers correct |
 | `make verify.fresh` | Bootstrap from clean state + secrets dump, full system green |
-| `make smoke` | Deployed URL serves landing + sim routes + share-load round-trip |
+| `make smoke` | Deployed URL serves landing + sim routes + share-link round-trip |
 
 ## Migration
 
 | From → To | Cost |
 |---|---|
-| Dokploy VM → other VM | New dokploy deploy, re-point DNS, restore Convex data via `convex export/import`. Hours. |
-| Dokploy → K8s cluster | Compose → Helm chart parity already maintained. Apply Helm, re-point DNS. Hours. |
+| Dokploy VM → other VM | New dokploy deploy, re-point DNS. Minutes — the app is stateless on the server. |
+| Dokploy → K8s cluster | Compose → Helm chart parity already maintained. Apply Helm, re-point DNS. Minutes. |
 | Cloudflare → other CDN | Re-point DNS. Cache rebuilds from origin. Minutes. |
 
 ## Caught by

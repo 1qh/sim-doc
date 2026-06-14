@@ -43,30 +43,23 @@ mindmap
       tanstack-table register memory control panels
       tanstack-virtual command palette memory
       tanstack-form schema-driven forms over Zod
-      tanstack-query alongside Convex client where useful
+      tanstack-query client-side compute caching where useful
       at dnd-kit drag for 2D K-map
     Editor
       Monaco editor
       chevrotain for MIPS grammar
       chevrotain for Boolean expression grammar
-    Persistence
-      Convex self host
-      at convex-dev slash auth
-      at auth slash core providers Google
-      Convex codegen typed API
-    Content addressable share
-      Blake3 hash via at noble slash hashes
-      Zstd via Bun.zstdCompress Bun.zstdDecompress server side
-      Native CompressionStream DecompressionStream client side
-      URL fragment tier
-      Convex file storage tier
+    Fragment-only share
+      Zstd via native CompressionStream DecompressionStream
+      Base64url URL-fragment encode
+      Oversize payloads non-shareable by design
     Edge
       Caddy reverse proxy
       Caddy cache module
       Cloudflare DNS bearer
       Cloudflare CDN bearer cache only
     Deploy
-      Dokploy VM existing
+      Static export to edge
       Single bootstrap script
       Helm parity to compose
     Tooling
@@ -80,7 +73,6 @@ mindmap
       happy dom global registrator
       testing library react
       fast check property based
-      convex-test
       Playwright E2E
       Stryker mutation testing
       axe-core a11y
@@ -133,7 +125,7 @@ Per `book/PHILOSOPHY.md` Latest-only rule — every direct dep tracks upstream l
 | `three-kit` | R3F + drei + drei-uikit + postprocessing + TSL helpers + material library + camera grammar | R3F ecosystem |
 | `hud` | In-3D UI chrome backed by drei-uikit | drei-uikit |
 | `design-tokens` | Palette, typography, spacing, motion easing | None (TS only) |
-| `sim-engine` | Deterministic state machine + scrub + snapshot codec (blake3 + zstd + canonicalize) | `@noble/hashes` for blake3, `Bun.zstdCompress`/`Bun.zstdDecompress` server-side + native `CompressionStream`/`DecompressionStream` client-side |
+| `sim-engine` | Deterministic state machine + scrub + share codec (canonicalize + zstd) | native `CompressionStream`/`DecompressionStream` for client-side zstd |
 | `editor` | Monaco wrapper + chevrotain grammar wiring | Monaco, chevrotain |
 | `bits` | Two's complement, sign-extend, hex / bin / dec conversions, bit slicing | None |
 | `boolean` | Truth table, QM, Petrick, Espresso, prime implicants, hazard analysis | None (or OSS solver wrapped per audit) |
@@ -142,9 +134,9 @@ OSS-import-first scan per package logged in the package's ADR — see `adr/three
 
 ## Product app stack
 
-`apps/web` (Next.js):
-- Routes: `/` landing, `/datapath` MIPS sim, `/kmap` K-map tool, `/pipeline` pipeline view, `/compare` side-by-side, `/learn/*` MDX explainers, `/s/[hash]` shared snapshot, `/me` (auth-gated, optional)
-- Server: RSC + Server Actions for save/share/assemble, Route Handlers for Convex webhooks
+`apps/web` (Next.js) — pure client-only, no backend:
+- Routes: `/` landing, `/datapath` MIPS sim, `/kmap` K-map tool, `/pipeline` pipeline view, `/compare` side-by-side, `/learn/*` MDX explainers, `/s/[hash]` shared snapshot, `/me` local snapshot list
+- Server: RSC + Server Actions for static assemble/solve compute; no server-side persistence
 - Client: 3D canvas islands, Monaco editor, zustand stores, motion transitions
 - Components: shadcn registry primitives + cnsync (operator's `readonly/ui` workspace) — Button, Dialog, Drawer, Tabs, Tooltip, Popover, Sheet, Toast, etc.
 - Forms: `@tanstack/react-form` + Zod resolver
@@ -153,18 +145,7 @@ OSS-import-first scan per package logged in the package's ADR — see `adr/three
 - Drag: `@dnd-kit` for 2D K-map cell drag-grouping (3D toroidal uses in-canvas R3F drag)
 - Icons: `lucide-react`
 - Themes: `next-themes` provider
-- Auth: `@convex-dev/auth` + `@auth/core/providers/google` (matches operator's reference Convex+auth project pattern in memory), anon-first, signin = optional cross-device persistence
-- Convex client: `convex` + `@convex-dev/auth` React bindings
-
-## Convex backend stack
-
-`apps/backend`:
-- Convex self-host instance reachable via `CONVEX_SELF_HOSTED_URL`
-- Schema: snapshots, users, userProfiles (mirrors operator's reference profile-with-role pattern in memory), share-index
-- Functions: `saveSnapshot`, `loadSnapshot`, `claimAnonSnapshots`, auth callbacks
-- Auth providers: Google via `@auth/core/providers/google`
-- File storage: Convex built-in for snapshot bodies >1KB
-- Scheduled jobs: abuse-flag sweeps if/when triggered
+- Compute cache: `@tanstack/react-query` for client-side memoization of pure assemble/solve results
 
 ## Worker concurrency (no banned deps)
 
@@ -182,7 +163,6 @@ Same images, same env shape, same bootstrap. Scale parameters differ between dep
 | Service | Image |
 |---|---|
 | `next-app` | Built from `apps/web` Dockerfile, Next standalone output |
-| `convex-backend` | `ghcr.io/get-convex/convex-backend:latest` (self-host) |
 | `caddy` | `caddy:latest` with cache module |
 | `plausible` | Self-host Plausible Analytics container |
 
@@ -192,6 +172,14 @@ Same images, same env shape, same bootstrap. Scale parameters differ between dep
 - `make verify.bearer` — with Cloudflare CDN + DNS in front, green
 - `make verify.fresh` — bootstrap from secrets dump + clean state, green
 - All three exercised periodically per `book/PHILOSOPHY.md` "Seamless machine migration"
+
+## Pitfall
+
+- Use `stats-gl` for the perf HUD — it provides WebGPU timer-query support as a drop-in R3F component (r3f-perf lacks WebGPU timer queries).
+- Use `serwist` (`@serwist/next`) for the service worker — first-class App Router + Next 16 + TypeScript + revision-keyed precache (next-pwa lacks App Router/TS support).
+- Use `size-limit` + `andresz1/size-limit-action` for bundle gating + `hashicorp/nextjs-bundle-analysis` for per-route diffs (size-limit covers the maintained PR-comment path).
+- Use `motion`'s imperative `animate()` on three properties (Vector3 reads as `{x,y,z}`) plus hand-rolled `MathUtils.damp3` critically-damped springs in `useFrame` for continuous tracking — `motion` is the maintained successor to framer-motion-3d, which carries no three integration.
+- `detect-gpu`'s benchmark DB lags maintainer cadence — augment with `hardwareConcurrency` + `deviceMemory` + a user override toggle; render preview first and upgrade async, never gating first paint.
 
 ## Caught by
 

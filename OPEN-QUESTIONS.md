@@ -5,10 +5,8 @@ Genuinely undecided forks. Items live here only while truly open. Once decided, 
 Resolved decisions captured in the MCQ walkthrough at brainstorm time live in the ADRs under `adr/`:
 - `adr/substrate-publication.md`
 - `adr/asset-authoring.md`
-- `adr/persistence-convex.md`
 - `adr/brand-name.md`
 - `adr/deploy-target.md`
-- `adr/auth-anon-first.md`
 - `adr/share-content-addressed.md`
 - `adr/kmap-geometry.md`
 - `adr/pipeline-shape.md`

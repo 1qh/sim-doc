@@ -35,7 +35,6 @@ If a code-lint concern is not covered by lintmax: file upstream against lintmax 
 |---|---|
 | Bun test | Unit + integration |
 | `fast-check` | Property-based |
-| `convex-test` | Convex functions |
 | Playwright | E2E + visual regression + a11y axe-core |
 | Stryker | Mutation score ≥ 80% on sim-engine, boolean, bits per `adr/mutation-testing.md` |
 | `axe-core` (via Playwright) | Zero WCAG AA violations per `A11Y.md` |
@@ -67,16 +66,15 @@ These are NOT code lints — they enforce docs prose, banned vocab, domain polic
 | `velocity-mode-marker.ts` | `.github/workflows/*.yml` carry disable marker while velocity-mode active |
 | `error-catalog.ts` | Every error code literal in source appears in `ERROR-CATALOG.md` |
 | `telemetry-events.ts` | Every event-emit site matches `TELEMETRY-EVENTS.md` catalog |
-| `use-cache-discipline.ts` | `'use cache'` only on pure-function modules + non-auth queries |
+| `use-cache-discipline.ts` | `'use cache'` only on pure-function modules |
 | `oss-import-first.ts` | Hand-rolls match exception entries in `adr/oss-import-audit.md` |
-| `auth-wall.ts` | Banned wall phrases in product copy |
 | `brand-presence.ts` | Brand name appears only after locked + no other invented names |
 | `state-layer.ts` | Per-layer state ownership patterns from `STATE-MANAGEMENT.md` |
 | `stack-presence.ts` | Each `STACK.md` pick consumed by source |
 | `zero-fallback.ts` | `?? <literal>` against config reads + getenv patterns |
 | `check-no-infinite-wait.ts` | Unbounded wait loops without deadline |
 | `check-staleness.ts` | Direct deps with no upstream release in 6 months (complements Renovate) |
-| `api-conventions.ts` | Server Action / Route Handler / Convex naming + validation shape per `API-CONVENTIONS.md` |
+| `api-conventions.ts` | Server Action / Route Handler naming + validation shape per `API-CONVENTIONS.md` |
 | `no-third-party-trackers.ts` | Banned analytics SDK imports per `OBSERVABILITY.md` |
 | `cloudflare-bearer.ts` | No Cloudflare Worker / KV / D1 / Pages Functions imports |
 | `worker-pool-sizing.ts` | Workers spawned with correct count formula per `CONCURRENCY.md` |

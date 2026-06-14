@@ -12,7 +12,7 @@ Exception requires:
 
 Never hand-roll when a maintained alternative exists, even lesser-known. Per memory `feedback_operator_patterns.md` "lesser-known + active > popular + dying".
 
-## Exceptions (verified 2026-05-14, 7 stale)
+## Exceptions
 
 ### remark-frontmatter
 

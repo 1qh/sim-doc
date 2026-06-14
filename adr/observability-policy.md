@@ -4,6 +4,7 @@
 
 Self-host aggregate-only privacy-respecting:
 - Plausible Analytics for page-view + aggregate event counts (self-host operator)
+- Client RUM (Real User Monitoring) for anonymous performance metrics
 - Structured JSON logs to stdout, captured by Dokploy log pipeline
 - Optional platform-managed error reporter or error-boundary surfaces only (deferred unless triggered) — pm4ai bans `@sentry`, `@bugsnag`, `@honeybadger`, `rollbar`
 - Optional self-host Grafana + Prometheus (deferred unless triggered)
@@ -11,9 +12,9 @@ Self-host aggregate-only privacy-respecting:
 
 ## Why not third-party hosted
 
-- No persistent user identity at any third party
+- No persistent visitor identity at any third party
 - Per `book/PHILOSOPHY.md` self-host first + bearer-mode-or-self-host invariant
-- Aggregate-only respects user privacy without consent banners
+- Aggregate-only respects visitor privacy without consent banners
 
 ## Plausible config
 
@@ -21,8 +22,14 @@ Self-host aggregate-only privacy-respecting:
 - Single site = our domain
 - Cookieless (default Plausible behavior)
 - DNT-respecting
-- Events tracked: page views, snapshot saved (count only), example loaded, signin (count only)
-- No custom dimensions tied to user identity
+- Events tracked: page views, share-link created (count only), example loaded
+- No custom dimensions; visitors are anonymous, no identity to tie to
+
+## Client RUM
+
+- Anonymous performance signals only: Core Web Vitals, bundle load time, share-encode duration
+- No visitor identifier; aggregate buckets only
+- Sampled, batched, emitted to the self-host pipeline
 
 ## Log format
 
@@ -31,12 +38,12 @@ Structured JSON to stdout. Caddy log → Dokploy → operator's log pipeline.
 Fields:
 - `ts`, `level`, `service`, `op`, `duration_ms`, `outcome`, `errCode`, `redacted_fields`
 
-PII redaction at boundary: emails, user IDs, OAuth tokens, request bodies containing such → hash or redact before log emit.
+PII redaction at boundary: any request body or header that could carry personal data → hash or redact before log emit. Visitors are anonymous; logs carry no identity.
 
 ## Banned
 
 - Google Analytics, Mixpanel, Segment, Amplitude, Hotjar, FullStory, Heap, Plausible-Cloud (use self-host)
-- Per-user behavioral tracking
+- Per-visitor behavioral tracking
 - Session recording
 - A/B testing infrastructure that targets individuals
 - Cross-domain tracking
@@ -48,6 +55,10 @@ PII redaction at boundary: emails, user IDs, OAuth tokens, request bodies contai
 - OpenTelemetry: distributed tracing needed (low-priority for current scope)
 
 Each trigger lands as ADR amendment, never speculative.
+
+## Pitfall
+
+- Speculation-rules prerendered pages run JS, so analytics events fire before the user navigates — gate every analytics call on `document.prerendering === false` and listen for `prerenderingchange` to flush queued events on activation.
 
 ## Caught by
 

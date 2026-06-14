@@ -71,7 +71,7 @@ mindmap
 
 | Variant | Use |
 |---|---|
-| `primary` | Primary action (Save, Sign in) — accent color, solid |
+| `primary` | Primary action (Save, Share) — accent color, solid |
 | `secondary` | Secondary action (Reset, Cancel) — outline, neutral |
 | `ghost` | Tertiary action (toggle, dismiss) — text only, no border |
 | `destructive` | Irreversible action (Delete, Flag) — warning color, requires confirm |

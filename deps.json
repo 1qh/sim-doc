@@ -50,14 +50,8 @@
     "@logtape/logtape",
     "ky"
   ],
-  "persistence": [
-    "convex",
-    "@convex-dev/auth",
-    "@auth/core"
-  ],
   "substrate_pure": [
     "espresso-iisojs",
-    "@noble/hashes",
     "canonicalize",
     "rfc6902",
     "@thi.ng/dgraph",
@@ -95,7 +89,6 @@
     "happy-dom",
     "@testing-library/react",
     "fast-check",
-    "convex-test",
     "@playwright/test",
     "@stryker-mutator/core",
     "axe-core",

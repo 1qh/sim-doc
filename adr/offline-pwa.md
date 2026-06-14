@@ -2,12 +2,12 @@
 
 ## Decision
 
-Service worker registered on first visit. Caches app shell + sim assets + visited example bundles + visited permalink snapshots. Sims continue working offline after first load. Saves are queued + replayed on reconnect.
+Service worker registered on first visit. Caches app shell + sim assets + visited example bundles. The app is pure client-side — every sim, every share decode, and the local snapshot list run entirely in the browser, so the whole app is fully offline-capable after first load.
 
 ## Why
 
 - Learning tool — users sometimes work offline (plane, transit, low-connectivity environment)
-- Sim is fundamentally client-side (3D + state machine), no inherent reason it can't run offline
+- Sim is fundamentally client-side (3D + state machine), every fact computed in-browser
 - Asymmetric UX win for low cost
 - Aligns with "world-class endpoint" — premium web apps work offline
 
@@ -17,29 +17,21 @@ Service worker registered on first visit. Caches app shell + sim assets + visite
 - Caching strategy:
   - **App shell** (HTML, JS, CSS): `StaleWhileRevalidate`
   - **3D assets** (none today, but if any HDRI / fonts): `CacheFirst`, immutable
-  - **Permalink snapshots** (`/s/[hash]` API responses): `CacheFirst`, immutable, indefinite TTL
   - **Examples** (`/api/examples/[slug]`): `StaleWhileRevalidate`
   - **Fonts** (Latin subset): `CacheFirst`, immutable
-  - **API mutations** (`saveSnapshot`): `NetworkOnly` with background-sync queue fallback
 - Versioning: build-time hash for cache keys; new build invalidates old
 - Update flow: subtle "new version available, reload" toast (single, dismissible)
 
-## Offline save queue
+## Fully offline by construction
 
-Anonymous saves queued in IndexedDB when offline. On reconnect, queue replays:
-1. For each queued save, recompute canonical body + hash
-2. POST to `saveSnapshot` mutation
-3. If success: remove from queue, update local hash cache
-4. If failure: keep in queue, retry on next online event
-
-Tier-1 URL-fragment shares work offline natively (no backend roundtrip ever).
+The app holds zero server dependency at runtime:
+- Shares decode from the URL fragment in-browser (gzip via native `DecompressionStream`, base64url decode) — no roundtrip ever.
+- `/me` reads the local snapshot list straight from `localStorage` — works offline.
+- Sims (3D + state machine) compute every value client-side.
 
 ## What requires online
 
-- Signin (OAuth flow)
-- Claim anonymous snapshots
-- Load `/me` page (requires fresh Convex query)
-- Initial load of an unseen permalink not in cache
+- Initial load of the app shell + an unseen example bundle not yet cached.
 
 Everything else continues functioning offline.
 
@@ -61,9 +53,14 @@ Installable to home screen on supported browsers.
 - Aggressive prefetch of unvisited routes
 - Notifications API (no push notifications in floor)
 
+## Pitfall
+
+- Background Sync API is Chromium-only — the primary offline-replay path is the `online` event + boot-time replay; SW background-sync is a bonus where available.
+
 ## Caught by
 
 - Service-worker smoke: page works offline after first online visit
 - Cache-size budget test
-- Background-sync test: save queued offline → reconnect → save persisted
+- Offline-share smoke: share link decodes from URL fragment with network disabled
+- Offline-`/me` smoke: snapshot list renders from localStorage with network disabled
 - Update-flow smoke: deploy new version → toast appears → reload → new version active

@@ -87,17 +87,15 @@ Domain term inventory. Substrate-boundary discipline helper: if a term appears h
 | Propagation delay | Time for a signal to traverse a component |
 | Clock period | Time per cycle; bounded by worst-case critical path across all instructions |
 
-## Auth / persistence
+## Share
 
 | Term | Meaning |
 |---|---|
-| Anonymous | No identity; default state |
-| Claim | Linking an anonymous-saved snapshot to a user after signin |
-| Permalink | URL pointing at a specific sim state; content-addressed or URL-fragment-encoded |
-| Tier-1 | URL-fragment-encoded share, ≤1KB canonical bytes, no backend hit |
-| Tier-2 | Content-addressed share via Convex, >1KB canonical bytes |
-| Hash | blake3 truncated 16-hex-char identifier of canonical body |
-| Snapshot | Serialized sim state |
+| Anonymous | No identity; every visitor's only state |
+| Permalink | URL carrying a specific sim state, encoded entirely in the URL fragment |
+| Fragment tier | Share whose compressed payload fits a URL fragment (tier `'fragment'`) |
+| Oversize tier | Sim state whose compressed payload exceeds the URL-fragment budget; non-shareable by design (tier `'oversize'`) |
+| Snapshot | Serialized sim state, saved to the visitor's local in-browser list |
 | Snapshot version | Schema version embedded in snapshot body |
 
 ## Banned in substrate code

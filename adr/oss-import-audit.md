@@ -12,7 +12,7 @@ Hand-roll allowed only when:
 - An OSS lib exists but surface mismatch requires more adapter code than the underlying lib (rare)
 
 Hand-roll bans:
-- Cryptographic / hash code (`@noble/hashes` for blake3 ✓)
+- Cryptographic / hash code (`Bun.CryptoHasher` ✓)
 - Compression — `Bun.zstdCompress` / `Bun.zstdDecompress` server, native `CompressionStream` / `DecompressionStream` client. `fzstd` / `pako` / `fflate` banned.
 - Validation (`zod` v4 ✓)
 - JSON canonicalization (use `safe-stable-stringify`, never hand-roll)
@@ -64,7 +64,6 @@ The operator's pm4ai banned-deps catalog at `/Users/o/z/pm4ai/packages/pm4ai/src
 | Build | Bun built-in transpiler + `tsdown` + Turbopack | `webpack`, `rollup`, `tsup`, `esbuild` (direct), `vite`, `@babel`, `@swc` |
 | Test | Bun test | `jest`, `vitest`, `mocha`, `ava` |
 | Hashing (non-crypto) | `Bun.CryptoHasher` | `crc`, `crc-32`, `md5`, `sha.js`, `hash-wasm`, `xxhash-wasm` |
-| Hash (blake3 specifically) | `@noble/hashes` (NOT in pm4ai banned list, not in Bun.CryptoHasher) | banned crypto-libs above |
 | Compression | `Bun.zstdCompress`/`Bun.zstdDecompress` (server), native `CompressionStream`/`DecompressionStream` (client) | `pako`, `fflate`, `jszip`, `lz-string`, `fzstd` (transitional) |
 | Glob | `Bun.Glob` | `fast-glob`, `glob`, `globby`, `micromatch`, `minimatch`, `tinyglobby` |
 | Validation | `zod` | `joi`, `ajv`, `arktype`, `superstruct`, `yup`, `valibot` |
@@ -268,7 +267,7 @@ Native `btoa` / `atob` doesn't handle URL-safe base64 directly. Tiny wrapper (~1
 ## CI gate
 
 `tools/lint/oss-import-first.ts`:
-- Greps `packages/*/src` + `apps/web/src` + `apps/backend/convex` for hand-rolled patterns that match libraries above (canonicalize, fuzzy search, worker pool, etc.)
+- Greps `packages/*/src` + `apps/web/src` for hand-rolled patterns that match libraries above (canonicalize, fuzzy search, worker pool, etc.)
 - Asserts each hand-roll has matching exception entry in this ADR with rejection rationale
 - Asserts each library above appears as a direct dep in the consuming package
 
